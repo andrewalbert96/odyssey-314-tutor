@@ -25,6 +25,16 @@
       --accent2:#1d4ed8;
       --danger:#b91c1c;
       --ok:#065f46;
+
+      /* Theme variables randomized in JS */
+      --g1x: 20%;
+      --g1y: 10%;
+      --tintA: rgba(255,237,213,0.95);
+      --tintB: rgba(243,244,246,0.80);
+      --tintC: rgba(243,244,246,1);
+      --bg-img: url("https://upload.wikimedia.org/wikipedia/commons/8/89/OdysseySuitors.png");
+      --bg-op: 0.10;
+      --bg-blur: 0.6px;
     }
 
     body{
@@ -35,7 +45,7 @@
       color:var(--ink);
       font-family: "Crimson Pro", ui-serif, Georgia, serif;
       background:
-        radial-gradient(1200px 600px at 20% 10%, rgba(255,237,213,0.95), rgba(243,244,246,0.8) 55%, rgba(243,244,246,1)),
+        radial-gradient(1200px 600px at var(--g1x) var(--g1y), var(--tintA), var(--tintB) 55%, var(--tintC)),
         #f3f4f6;
       position:relative;
       overflow-x:hidden;
@@ -45,13 +55,14 @@
       content:"";
       position:fixed;
       inset:0;
-      background-image: url("https://upload.wikimedia.org/wikipedia/commons/8/89/OdysseySuitors.png");
+      background-image: var(--bg-img);
       background-size: cover;
       background-position: center;
-      opacity: 0.10;
-      filter: blur(0.6px);
+      opacity: var(--bg-op);
+      filter: blur(var(--bg-blur));
       pointer-events:none;
       z-index:-1;
+      transform: scale(1.02);
     }
 
     .container{
@@ -216,11 +227,6 @@
       font-weight: 800;
       white-space: pre-wrap;
     }
-    .ok{
-      color: var(--ok);
-      margin-top: 10px;
-      font-weight: 800;
-    }
 
     .hint{
       color: var(--muted);
@@ -243,18 +249,10 @@
       margin:14px 0 8px;
       letter-spacing: 0.01em;
     }
-    .ai h1{ font-size: 22px; }
-    .ai h2{ font-size: 18px; }
-    .ai h3{ font-size: 16px; }
     .ai p{ margin:8px 0; }
     .ai ul, .ai ol{ margin:8px 0 8px 22px; }
     .ai li{ margin:6px 0; }
     .ai strong{ color:#0f172a; }
-    .ai code{
-      background:rgba(17,24,39,.06);
-      padding:2px 6px;
-      border-radius:8px;
-    }
     .ai blockquote{
       margin:10px 0;
       padding:10px 12px;
@@ -282,7 +280,7 @@
       font-weight: 800;
     }
 
-    /* ===== Image block ===== */
+    /* ===== Auto visuals (no AI image quota required) ===== */
     .imgWrap{
       margin-top: 12px;
       border-radius: 18px;
@@ -322,7 +320,7 @@
       <p class="small" id="subline">Start by choosing an industry. You can skip any Direction question.</p>
     </header>
 
-    <!-- Screen 1: Industry -->
+    <!-- Screen 1 -->
     <section class="card screen active" id="screenIndustry">
       <h3>Step 1 — Choose an industry</h3>
       <label for="industryInput">What is an industry you are interested in innovating within?</label>
@@ -337,22 +335,18 @@
       <div id="errorIndustry" class="error"></div>
     </section>
 
-    <!-- Screen 2: Industry summary -->
+    <!-- Screen 2 -->
     <section class="card screen" id="screenSummary">
       <h3>Step 2 — Current industry snapshot</h3>
       <p class="hint">We’ll summarize the current players’ Value Proposition and Value Architecture (high level, no invented data).</p>
 
-      <!-- Styled AI output -->
-      <div id="summaryText" class="ai"></div>
-
-      <!-- Optional image -->
-      <div class="actions" style="margin-top:12px;">
-        <button id="btnSummaryImage" class="secondary" type="button">Generate an industry visual</button>
-      </div>
-      <div id="summaryImgBlock" class="imgWrap" style="display:none;">
+      <!-- Auto image shown by default -->
+      <div id="summaryImgBlock" class="imgWrap">
         <img id="summaryImg" alt="Industry visual" />
-        <div class="imgCap" id="summaryImgCap"></div>
+        <div class="imgCap" id="summaryImgCap">Visualizing the industry…</div>
       </div>
+
+      <div id="summaryText" class="ai" style="margin-top:12px;"></div>
 
       <div class="actions">
         <button id="btnSummaryContinue" type="button">Continue</button>
@@ -362,7 +356,7 @@
       <div id="errorSummary" class="error"></div>
     </section>
 
-    <!-- Screen 3: Underserved value idea -->
+    <!-- Screen 3 -->
     <section class="card screen" id="screenIdea">
       <h3>Step 3 — Your underserved value idea</h3>
       <label for="ideaInput">List any idea you have to add value that is currently underserved within the market.</label>
@@ -377,7 +371,7 @@
       <div id="errorIdea" class="error"></div>
     </section>
 
-    <!-- Screen 4: Directions (one at a time) -->
+    <!-- Screen 4 -->
     <section class="card screen" id="screenDirections">
       <h3 id="directionTitle">Direction 1 of 14</h3>
       <p class="small" id="directionSubtitle">Answer in 2–6 lines. You can skip.</p>
@@ -395,21 +389,17 @@
       <div id="errorDir" class="error"></div>
     </section>
 
-    <!-- Screen 5: Final business model output -->
+    <!-- Screen 5 -->
     <section class="card screen" id="screenOutput">
       <h3>Step 17 — Your new business model (Odyssey 3.14)</h3>
 
-      <!-- Styled AI output -->
-      <div id="finalOutput" class="ai"></div>
-
-      <!-- Optional concept image -->
-      <div class="actions" style="margin-top:12px;">
-        <button id="btnFinalImage" class="secondary" type="button">Generate a concept visual</button>
-      </div>
-      <div id="finalImgBlock" class="imgWrap" style="display:none;">
+      <!-- Auto concept image shown by default -->
+      <div id="finalImgBlock" class="imgWrap">
         <img id="finalImg" alt="Concept visual" />
-        <div class="imgCap" id="finalImgCap"></div>
+        <div class="imgCap" id="finalImgCap">Visualizing your concept…</div>
       </div>
+
+      <div id="finalOutput" class="ai" style="margin-top:12px;"></div>
 
       <div class="actions">
         <button id="btnRestart" class="secondary" type="button">Restart</button>
@@ -431,7 +421,93 @@
     /* ===== CONFIG ===== */
     const GEMINI_API_KEY = "AIzaSyDAesLJDXy6g1NSz-YTIOp2LRRpavLs9Es"; // <-- paste your key here
 
-    /* ===== SYSTEM CONTEXT (your framework) ===== */
+    /* ===== Background randomizer (same theme, slight variation each load) ===== */
+    function applyRandomTheme() {
+      const root = document.documentElement;
+
+      const gx = Math.floor(10 + Math.random() * 35) + "%";
+      const gy = Math.floor(6 + Math.random() * 22) + "%";
+      root.style.setProperty("--g1x", gx);
+      root.style.setProperty("--g1y", gy);
+
+      const palettes = [
+        // warm parchment
+        { a:"rgba(255,237,213,0.95)", b:"rgba(243,244,246,0.82)", c:"rgba(243,244,246,1)" },
+        // slightly cooler dawn
+        { a:"rgba(224,242,254,0.80)", b:"rgba(243,244,246,0.86)", c:"rgba(243,244,246,1)" },
+        // golden hour
+        { a:"rgba(254,243,199,0.90)", b:"rgba(243,244,246,0.84)", c:"rgba(243,244,246,1)" },
+        // rosy parchment
+        { a:"rgba(255,228,230,0.75)", b:"rgba(243,244,246,0.88)", c:"rgba(243,244,246,1)" },
+      ];
+      const p = palettes[Math.floor(Math.random() * palettes.length)];
+      root.style.setProperty("--tintA", p.a);
+      root.style.setProperty("--tintB", p.b);
+      root.style.setProperty("--tintC", p.c);
+
+      const overlays = [
+        "https://upload.wikimedia.org/wikipedia/commons/8/89/OdysseySuitors.png",
+        "https://upload.wikimedia.org/wikipedia/commons/0/06/Odysseus_Returns.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/6/6f/Odysseus_by_Guerin.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/3/3e/Ulysses_and_the_Sirens_-_John_William_Waterhouse.jpg"
+      ];
+      const img = overlays[Math.floor(Math.random() * overlays.length)];
+      root.style.setProperty("--bg-img", `url("${img}")`);
+
+      const op = (0.08 + Math.random() * 0.06).toFixed(2);
+      root.style.setProperty("--bg-op", op);
+      root.style.setProperty("--bg-blur", (0.4 + Math.random() * 0.8).toFixed(1) + "px");
+    }
+
+    /* ===== Visuals without AI image quota =====
+       Uses a free public image endpoint (no key) + a safe fallback.
+       If the endpoint rate-limits or blocks, we fallback to a local SVG.
+    */
+    function svgFallbackDataUri(title, subtitle) {
+      const safeTitle = (title || "").replace(/[<>&"]/g, "");
+      const safeSub = (subtitle || "").replace(/[<>&"]/g, "");
+      const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="700" viewBox="0 0 1400 700">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8e7c7"/>
+      <stop offset="1" stop-color="#e6eefc"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="
+        1 0 0 0 0
+        0 1 0 0 0
+        0 0 1 0 0
+        0 0 0 .10 0"/>
+    </filter>
+  </defs>
+  <rect width="1400" height="700" fill="url(#g)"/>
+  <rect width="1400" height="700" filter="url(#grain)" opacity="0.35"/>
+  <path d="M120 520 C 320 420, 420 560, 620 470 S 980 420, 1260 510" fill="none" stroke="rgba(37,99,235,.30)" stroke-width="10"/>
+  <circle cx="260" cy="470" r="34" fill="rgba(37,99,235,.20)" stroke="rgba(17,24,39,.15)" stroke-width="2"/>
+  <circle cx="700" cy="470" r="34" fill="rgba(37,99,235,.20)" stroke="rgba(17,24,39,.15)" stroke-width="2"/>
+  <circle cx="1120" cy="500" r="34" fill="rgba(37,99,235,.20)" stroke="rgba(17,24,39,.15)" stroke-width="2"/>
+  <text x="90" y="150" font-family="Cinzel, serif" font-size="54" font-weight="800" fill="#111827">${safeTitle}</text>
+  <text x="92" y="200" font-family="Crimson Pro, serif" font-size="28" fill="rgba(17,24,39,.75)">${safeSub}</text>
+  <text x="92" y="255" font-family="Crimson Pro, serif" font-size="20" fill="rgba(17,24,39,.60)">Visual placeholder (no image quota needed)</text>
+</svg>`;
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.trim());
+    }
+
+    async function setAutoImage(imgEl, capEl, query, caption) {
+      // Try a public image (no key). If it fails, fallback SVG.
+      // This endpoint returns a random relevant image for the query.
+      const url = `https://source.unsplash.com/1600x800/?${encodeURIComponent(query)}`;
+      imgEl.onload = () => { capEl.textContent = caption; };
+      imgEl.onerror = () => {
+        imgEl.src = svgFallbackDataUri(query, caption);
+        capEl.textContent = caption + " (fallback)";
+      };
+      imgEl.src = url;
+    }
+
+    /* ===== SYSTEM CONTEXT ===== */
     const SYSTEM_CONTEXT = `
 Role: You are an expert consultant and pedagogical guide in the Odyssey 3.14 business model innovation framework. Your goal is to help students invent new business models.
 
@@ -464,10 +540,9 @@ Process: move from Reference Offer (current state) to New Business Model by expl
 14 Leverage strategic resources
     `.trim();
 
-    /* ===== MODEL AUTO-DETECT ===== */
+    /* ===== MODEL AUTO-DETECT (text only) ===== */
     const BASE = "https://generativelanguage.googleapis.com/v1beta";
     let SELECTED_MODEL = null;
-    let IMAGE_MODEL = null; // best available image-capable model, if present
 
     const modelBadge = document.getElementById("modelBadge");
     const refreshModelsBtn = document.getElementById("refreshModelsBtn");
@@ -506,28 +581,6 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       return usable[0].name;
     }
 
-    function pickBestImageModel(models) {
-      // Heuristic: look for names containing "image" and generateContent support.
-      // If your key has an image model, it will appear here.
-      const usable = (models || []).filter(m =>
-        Array.isArray(m.supportedGenerationMethods) &&
-        m.supportedGenerationMethods.includes("generateContent") &&
-        typeof m.name === "string" &&
-        m.name.toLowerCase().includes("image")
-      );
-      if (usable.length === 0) return null;
-
-      // Prefer "2.5" + "flash" if present
-      const score = (name) => {
-        const n = name.toLowerCase();
-        if (n.includes("2.5") && n.includes("flash")) return 500;
-        if (n.includes("flash")) return 400;
-        return 200;
-      };
-      usable.sort((a, b) => score(b.name) - score(a.name));
-      return usable[0].name;
-    }
-
     async function detectModel() {
       hideDebug();
       setModelBadge("Model: (detecting…)");
@@ -545,7 +598,6 @@ Process: move from Reference Offer (current state) to New Business Model by expl
         setModelBadge("Model: (not available)");
         showDebug(text);
         SELECTED_MODEL = null;
-        IMAGE_MODEL = null;
         return;
       }
 
@@ -553,15 +605,13 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       try { data = JSON.parse(text); } catch { data = { raw: text }; }
 
       SELECTED_MODEL = pickBestTextModel(data.models || []);
-      IMAGE_MODEL = pickBestImageModel(data.models || []);
-
       if (!SELECTED_MODEL) {
         setModelBadge("Model: (none found)");
         showDebug(data);
         return;
       }
 
-      setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong>` + (IMAGE_MODEL ? ` · <span style="opacity:.85">Images: ✅</span>` : ` · <span style="opacity:.85">Images: —</span>`));
+      setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong> · <span style="opacity:.85">Visuals: ✅ (no quota)</span>`);
     }
 
     /* ===== WIZARD STATE ===== */
@@ -592,7 +642,6 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    /* ===== DIRECTIONS ===== */
     const DIRECTION_QS = [
       { n: 1,  title: "Reduce customer overall costs", q: "How could you lower the customer’s total cost (price, ownership, time, switching) in this industry?", hint: "Think: cheaper, fewer steps, less waste, lower risk, fewer add-ons." },
       { n: 2,  title: "Reduce customer hassles", q: "What are the biggest pain points/hassles today, and how could you remove them?", hint: "Think: paperwork, waiting, uncertainty, confusing choices, hidden fees." },
@@ -621,17 +670,15 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       subline.textContent = "Answer each Direction (or Skip). After 14, we generate a full Odyssey 3.14 model.";
     }
 
-    /* ===== Markdown render helper ===== */
     function renderMarkdownInto(el, md) {
       const html = DOMPurify.sanitize(marked.parse(md || ""));
       el.innerHTML = html || "<p><em>(No output returned.)</em></p>";
     }
 
-    /* ===== AI CALL (text) with retry on 503 ===== */
     async function callGeminiText(promptText) {
       if (!SELECTED_MODEL) throw new Error("No model selected. Click Re-check model.");
-
       const url = `${BASE}/${SELECTED_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+
       let attempts = 0;
       const maxAttempts = 3;
 
@@ -639,9 +686,7 @@ Process: move from Reference Offer (current state) to New Business Model by expl
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }]
-          })
+          body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
         });
 
         const raw = await res.text();
@@ -653,9 +698,7 @@ Process: move from Reference Offer (current state) to New Business Model by expl
 
         if (res.status === 503) {
           attempts++;
-          if (attempts >= maxAttempts) {
-            throw new Error("The model is overloaded (503). Try again in 30–60 seconds.");
-          }
+          if (attempts >= maxAttempts) throw new Error("The model is overloaded (503). Try again in 30–60 seconds.");
           await new Promise(r => setTimeout(r, 1200 * attempts));
           continue;
         }
@@ -666,63 +709,20 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       throw new Error("Unexpected error.");
     }
 
-    /* ===== AI CALL (image) ===== */
-    async function callGeminiImage(imagePrompt) {
-      if (!IMAGE_MODEL) throw new Error("No image model is available for this API key.");
-
-      const url = `${BASE}/${IMAGE_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
-      let attempts = 0;
-      const maxAttempts = 3;
-
-      while (attempts < maxAttempts) {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: imagePrompt }] }]
-          })
-        });
-
-        const raw = await res.text();
-
-        if (res.ok) {
-          const data = JSON.parse(raw);
-          const parts = data.candidates?.[0]?.content?.parts || [];
-          // Look for inlineData with image
-          for (const p of parts) {
-            if (p.inlineData && p.inlineData.data && p.inlineData.mimeType) {
-              const mime = p.inlineData.mimeType;
-              const b64 = p.inlineData.data;
-              return { mime, b64 };
-            }
-          }
-          throw new Error("Image model responded but no inline image data was returned.");
-        }
-
-        if (res.status === 503) {
-          attempts++;
-          if (attempts >= maxAttempts) throw new Error("Image model overloaded (503). Try again in 30–60 seconds.");
-          await new Promise(r => setTimeout(r, 1200 * attempts));
-          continue;
-        }
-
-        throw new Error(`Gemini image error ${res.status}: ${raw}`);
-      }
-
-      throw new Error("Unexpected image error.");
-    }
-
-    /* ===== SCREEN LOGIC ===== */
+    /* ===== Screen logic ===== */
     const industryInput = document.getElementById("industryInput");
     const btnIndustryNext = document.getElementById("btnIndustryNext");
     const errorIndustry = document.getElementById("errorIndustry");
 
     const summaryTextEl = document.getElementById("summaryText");
     const errorSummary = document.getElementById("errorSummary");
-    const btnSummaryImage = document.getElementById("btnSummaryImage");
-    const summaryImgBlock = document.getElementById("summaryImgBlock");
     const summaryImg = document.getElementById("summaryImg");
     const summaryImgCap = document.getElementById("summaryImgCap");
+
+    const finalOutputEl = document.getElementById("finalOutput");
+    const errorOutput = document.getElementById("errorOutput");
+    const finalImg = document.getElementById("finalImg");
+    const finalImgCap = document.getElementById("finalImgCap");
 
     btnIndustryNext.addEventListener("click", async () => {
       errorIndustry.textContent = "";
@@ -731,13 +731,18 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       if (!SELECTED_MODEL) { errorIndustry.textContent = "Model not ready. Click “Re-check model” and try again."; return; }
 
       state.industry = industry;
+
+      // Show visuals immediately (no waiting for AI)
+      await setAutoImage(
+        summaryImg,
+        summaryImgCap,
+        `${industry}, business, industry, infographic, ancient`,
+        `Industry visual: ${industry}`
+      );
+
       setStep(2);
       showScreen("screenSummary");
       subline.textContent = "Generating a high-level snapshot of today’s industry players (VP + VA)…";
-
-      summaryImgBlock.style.display = "none";
-      summaryImg.src = "";
-      summaryImgCap.textContent = "";
 
       const prompt = `
 ${SYSTEM_CONTEXT}
@@ -781,40 +786,6 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       }
     });
 
-    // Image for industry snapshot
-    btnSummaryImage.addEventListener("click", async () => {
-      errorSummary.textContent = "";
-      if (!state.industry) { errorSummary.textContent = "Enter an industry first."; return; }
-      if (!IMAGE_MODEL) {
-        errorSummary.textContent = "No image model is available for this API key (text features still work).";
-        return;
-      }
-
-      btnSummaryImage.disabled = true;
-      btnSummaryImage.textContent = "Generating visual…";
-
-      try {
-        const imgPrompt = `
-Create a single, high-quality illustrative image for a student project.
-Theme: "${state.industry}" industry.
-Style: modern infographic + subtle parchment/epic vibe, clean composition, no text-heavy labels.
-Include: 1–2 simple icons that hint at value chain + customers (very minimal).
-Avoid: logos, brand names, copyrighted characters, and excessive text.
-        `.trim();
-
-        const { mime, b64 } = await callGeminiImage(imgPrompt);
-        summaryImg.src = `data:${mime};base64,${b64}`;
-        summaryImgCap.textContent = `AI-generated visual for: ${state.industry}`;
-        summaryImgBlock.style.display = "block";
-      } catch (e) {
-        errorSummary.textContent = String(e.message || e);
-      } finally {
-        btnSummaryImage.disabled = false;
-        btnSummaryImage.textContent = "Generate an industry visual";
-      }
-    });
-
-    // Screen 2 nav
     const btnSummaryContinue = document.getElementById("btnSummaryContinue");
     const btnSummaryBack = document.getElementById("btnSummaryBack");
 
@@ -830,7 +801,6 @@ Avoid: logos, brand names, copyrighted characters, and excessive text.
       subline.textContent = "Start by choosing an industry. You can skip any Direction question.";
     });
 
-    // Screen 3
     const ideaInput = document.getElementById("ideaInput");
     const btnIdeaContinue = document.getElementById("btnIdeaContinue");
     const btnIdeaBack = document.getElementById("btnIdeaBack");
@@ -851,7 +821,6 @@ Avoid: logos, brand names, copyrighted characters, and excessive text.
       subline.textContent = "Read the snapshot, then continue.";
     });
 
-    // Screen 4 directions
     const directionAnswer = document.getElementById("directionAnswer");
     const btnDirNext = document.getElementById("btnDirNext");
     const btnDirSkip = document.getElementById("btnDirSkip");
@@ -901,16 +870,8 @@ Avoid: logos, brand names, copyrighted characters, and excessive text.
       }
     });
 
-    // Screen 5 output
-    const finalOutputEl = document.getElementById("finalOutput");
-    const errorOutput = document.getElementById("errorOutput");
     const btnRestart = document.getElementById("btnRestart");
     const btnOutputBack = document.getElementById("btnOutputBack");
-
-    const btnFinalImage = document.getElementById("btnFinalImage");
-    const finalImgBlock = document.getElementById("finalImgBlock");
-    const finalImg = document.getElementById("finalImg");
-    const finalImgCap = document.getElementById("finalImgCap");
 
     btnRestart.addEventListener("click", () => {
       state.industry = "";
@@ -920,14 +881,14 @@ Avoid: logos, brand names, copyrighted characters, and excessive text.
 
       industryInput.value = "";
       ideaInput.value = "";
-
       summaryTextEl.innerHTML = "";
       finalOutputEl.innerHTML = "";
 
-      summaryImgBlock.style.display = "none";
-      finalImgBlock.style.display = "none";
-      summaryImg.src = "";
-      finalImg.src = "";
+      summaryImg.src = svgFallbackDataUri("Industry", "Visual placeholder");
+      summaryImgCap.textContent = "Visualizing the industry…";
+
+      finalImg.src = svgFallbackDataUri("Concept", "Visual placeholder");
+      finalImgCap.textContent = "Visualizing your concept…";
 
       errorIndustry.textContent = "";
       errorSummary.textContent = "";
@@ -951,9 +912,13 @@ Avoid: logos, brand names, copyrighted characters, and excessive text.
       errorOutput.textContent = "";
       hideDebug();
 
-      finalImgBlock.style.display = "none";
-      finalImg.src = "";
-      finalImgCap.textContent = "";
+      // Set concept image immediately (no AI image quota)
+      await setAutoImage(
+        finalImg,
+        finalImgCap,
+        `${state.industry}, concept, product design, service design, innovation, blueprint`,
+        `Concept visual: ${state.industry} innovation`
+      );
 
       const answered = DIRECTION_QS.map((d, idx) => {
         const a = (state.directions[idx] || "").trim();
@@ -1022,44 +987,15 @@ Constraints:
       }
     }
 
-    // Concept image generation
-    btnFinalImage.addEventListener("click", async () => {
-      errorOutput.textContent = "";
-      if (!state.industry) { errorOutput.textContent = "Missing industry."; return; }
-      if (!IMAGE_MODEL) {
-        errorOutput.textContent = "No image model is available for this API key (text features still work).";
-        return;
-      }
-
-      btnFinalImage.disabled = true;
-      btnFinalImage.textContent = "Generating visual…";
-
-      try {
-        const conceptPrompt = `
-Create a single, high-quality concept illustration for a new business model in the "${state.industry}" industry.
-Core underserved value idea: "${state.underservedIdea}"
-
-Style: clean modern product concept art + subtle epic/parchment vibe. Cinematic lighting, simple composition.
-Include: a central “hero” object/service scene plus small hints of value chain (e.g., icons or minimal elements).
-Avoid: logos, brand names, and lots of text.
-        `.trim();
-
-        const { mime, b64 } = await callGeminiImage(conceptPrompt);
-        finalImg.src = `data:${mime};base64,${b64}`;
-        finalImgCap.textContent = `AI-generated concept visual for the new business model idea`;
-        finalImgBlock.style.display = "block";
-      } catch (e) {
-        errorOutput.textContent = String(e.message || e);
-      } finally {
-        btnFinalImage.disabled = false;
-        btnFinalImage.textContent = "Generate a concept visual";
-      }
-    });
-
     /* ===== INIT ===== */
+    applyRandomTheme();
     refreshModelsBtn.addEventListener("click", detectModel);
     detectModel();
     setStep(1);
+
+    // Preload placeholders so images aren't blank before first run
+    document.getElementById("summaryImg").src = svgFallbackDataUri("Industry", "Visual placeholder");
+    document.getElementById("finalImg").src = svgFallbackDataUri("Concept", "Visual placeholder");
   </script>
 </body>
 </html>
