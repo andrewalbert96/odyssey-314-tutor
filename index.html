@@ -24,7 +24,6 @@
       --accent:#2563eb;
       --accent2:#1d4ed8;
       --danger:#b91c1c;
-      --ok:#065f46;
 
       /* Theme variables randomized in JS */
       --g1x: 20%;
@@ -280,7 +279,7 @@
       font-weight: 800;
     }
 
-    /* ===== Auto visuals (no AI image quota required) ===== */
+    /* ===== Auto visuals ===== */
     .imgWrap{
       margin-top: 12px;
       border-radius: 18px;
@@ -340,9 +339,9 @@
       <h3>Step 2 — Current industry snapshot</h3>
       <p class="hint">We’ll summarize the current players’ Value Proposition and Value Architecture (high level, no invented data).</p>
 
-      <!-- Auto image shown by default -->
+      <!-- Meaningful diagram shown by default -->
       <div id="summaryImgBlock" class="imgWrap">
-        <img id="summaryImg" alt="Industry visual" />
+        <img id="summaryImg" alt="Industry diagram" />
         <div class="imgCap" id="summaryImgCap">Visualizing the industry…</div>
       </div>
 
@@ -393,9 +392,9 @@
     <section class="card screen" id="screenOutput">
       <h3>Step 17 — Your new business model (Odyssey 3.14)</h3>
 
-      <!-- Auto concept image shown by default -->
+      <!-- Meaningful diagram shown by default -->
       <div id="finalImgBlock" class="imgWrap">
-        <img id="finalImg" alt="Concept visual" />
+        <img id="finalImg" alt="Business model diagram" />
         <div class="imgCap" id="finalImgCap">Visualizing your concept…</div>
       </div>
 
@@ -419,9 +418,9 @@
 
   <script>
     /* ===== CONFIG ===== */
-    const GEMINI_API_KEY = "AIzaSyDAesLJDXy6g1NSz-YTIOp2LRRpavLs9Es"; // <-- paste your key here
+    const GEMINI_API_KEY = "PUT_YOUR_KEY_HERE"; // <-- paste your key here
 
-    /* ===== Background randomizer (same theme, slight variation each load) ===== */
+    /* ===== Background randomizer ===== */
     function applyRandomTheme() {
       const root = document.documentElement;
 
@@ -431,13 +430,9 @@
       root.style.setProperty("--g1y", gy);
 
       const palettes = [
-        // warm parchment
         { a:"rgba(255,237,213,0.95)", b:"rgba(243,244,246,0.82)", c:"rgba(243,244,246,1)" },
-        // slightly cooler dawn
         { a:"rgba(224,242,254,0.80)", b:"rgba(243,244,246,0.86)", c:"rgba(243,244,246,1)" },
-        // golden hour
         { a:"rgba(254,243,199,0.90)", b:"rgba(243,244,246,0.84)", c:"rgba(243,244,246,1)" },
-        // rosy parchment
         { a:"rgba(255,228,230,0.75)", b:"rgba(243,244,246,0.88)", c:"rgba(243,244,246,1)" },
       ];
       const p = palettes[Math.floor(Math.random() * palettes.length)];
@@ -459,10 +454,7 @@
       root.style.setProperty("--bg-blur", (0.4 + Math.random() * 0.8).toFixed(1) + "px");
     }
 
-    /* ===== Visuals without AI image quota =====
-       Uses a free public image endpoint (no key) + a safe fallback.
-       If the endpoint rate-limits or blocks, we fallback to a local SVG.
-    */
+    /* ===== Safe fallback SVG (generic) ===== */
     function svgFallbackDataUri(title, subtitle) {
       const safeTitle = (title || "").replace(/[<>&"]/g, "");
       const safeSub = (subtitle || "").replace(/[<>&"]/g, "");
@@ -490,21 +482,132 @@
   <circle cx="1120" cy="500" r="34" fill="rgba(37,99,235,.20)" stroke="rgba(17,24,39,.15)" stroke-width="2"/>
   <text x="90" y="150" font-family="Cinzel, serif" font-size="54" font-weight="800" fill="#111827">${safeTitle}</text>
   <text x="92" y="200" font-family="Crimson Pro, serif" font-size="28" fill="rgba(17,24,39,.75)">${safeSub}</text>
-  <text x="92" y="255" font-family="Crimson Pro, serif" font-size="20" fill="rgba(17,24,39,.60)">Visual placeholder (no image quota needed)</text>
+  <text x="92" y="255" font-family="Crimson Pro, serif" font-size="20" fill="rgba(17,24,39,.60)">Generating a meaningful diagram from AI output…</text>
 </svg>`;
       return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.trim());
     }
 
-    async function setAutoImage(imgEl, capEl, query, caption) {
-      // Try a public image (no key). If it fails, fallback SVG.
-      // This endpoint returns a random relevant image for the query.
-      const url = `https://source.unsplash.com/1600x800/?${encodeURIComponent(query)}`;
-      imgEl.onload = () => { capEl.textContent = caption; };
-      imgEl.onerror = () => {
-        imgEl.src = svgFallbackDataUri(query, caption);
-        capEl.textContent = caption + " (fallback)";
+    /* ===== Meaningful SVG diagram FROM AI TEXT (no image API needed) ===== */
+    function renderIndustrySvgFromText(title, subtitle, mdText) {
+      const text = (mdText || "").replace(/\r/g, "");
+
+      // Helper: grab first non-empty line after a heading marker
+      const grabAfter = (needle) => {
+        const idx = text.toLowerCase().indexOf(needle.toLowerCase());
+        if (idx === -1) return "";
+        const after = text.slice(idx + needle.length);
+        const lines = after.split("\n").map(l => l.trim()).filter(Boolean);
+        // skip markdown bullets markers on first line if present
+        return (lines[0] || "").replace(/^[-*]\s*/, "");
       };
-      imgEl.src = url;
+
+      // Pull VP items (best-effort)
+      let what = "";
+      let whom = "";
+      let price = "";
+
+      // Look for bold labels in your required format
+      const mWhat = text.match(/\*\*what\*\*[\s\S]*?\n[-*]?\s*(.+)/i);
+      const mWhom = text.match(/\*\*to whom\*\*[\s\S]*?\n[-*]?\s*(.+)/i);
+      const mPrice = text.match(/\*\*at what price\*\*[\s\S]*?\n[-*]?\s*(.+)/i);
+
+      if (mWhat) what = mWhat[1].trim();
+      if (mWhom) whom = mWhom[1].trim();
+      if (mPrice) price = mPrice[1].trim();
+
+      // Fallbacks if parsing misses
+      if (!what) what = grabAfter("## 2)") || "Offer / product / service";
+      if (!whom) whom = "Target customers / segments";
+      if (!price) price = "Pricing pattern";
+
+      // Extract value chain bullet lines (best-effort)
+      let steps = [];
+      const chainBlock = text.match(/\*\*value chain\*\*[\s\S]*?(?:\n##|\n\*\*value network\*\*|\n\*\*strategic|\n$)/i);
+      if (chainBlock) {
+        const block = chainBlock[0];
+        steps = block.split("\n")
+          .map(s => s.trim())
+          .filter(s => /^[-*]\s+/.test(s))
+          .map(s => s.replace(/^[-*]\s+/, "").trim())
+          .filter(Boolean)
+          .slice(0,6);
+      }
+      if (steps.length === 0) steps = ["Acquire", "Produce", "Distribute", "Sell", "Service"];
+
+      const safe = (s) => (s || "").replace(/[<>&"]/g, "");
+      const W = 1400, H = 760;
+
+      const card = (x,y,w,h,heading,bodyHtml) => `
+        <g>
+          <rect x="${x}" y="${y}" rx="18" ry="18" width="${w}" height="${h}"
+            fill="rgba(255,255,255,0.78)" stroke="rgba(17,24,39,0.15)" />
+          <text x="${x+22}" y="${y+44}" font-size="30" font-weight="800" font-family="Cinzel, serif" fill="#111827">${safe(heading)}</text>
+          <foreignObject x="${x+22}" y="${y+62}" width="${w-44}" height="${h-76}">
+            <div xmlns="http://www.w3.org/1999/xhtml"
+              style="font-family:'Crimson Pro',serif;font-size:22px;line-height:1.25;color:rgba(17,24,39,.82);">
+              ${bodyHtml}
+            </div>
+          </foreignObject>
+        </g>
+      `;
+
+      const nodes = steps.map((s,i)=>{
+        const x = 140 + i * ((W-280)/Math.max(steps.length-1,1));
+        const y = 600;
+        return { s, x, y };
+      });
+
+      const links = nodes.slice(0,-1).map((_,i)=>{
+        const a = nodes[i], b = nodes[i+1];
+        return `<path d="M ${a.x} ${a.y} C ${a.x+80} ${a.y-90}, ${b.x-80} ${b.y-90}, ${b.x} ${b.y}"
+          fill="none" stroke="rgba(37,99,235,0.38)" stroke-width="10" />`;
+      }).join("");
+
+      const nodeDraw = nodes.map(n=>`
+        <g>
+          <circle cx="${n.x}" cy="${n.y}" r="34" fill="rgba(37,99,235,0.18)" stroke="rgba(17,24,39,0.14)" stroke-width="2"/>
+          <text x="${n.x}" y="${n.y+8}" text-anchor="middle"
+            font-family="Crimson Pro,serif" font-size="18" font-weight="700" fill="#111827">
+            ${safe(n.s).slice(0,16)}
+          </text>
+        </g>
+      `).join("");
+
+      const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8e7c7"/>
+      <stop offset="1" stop-color="#e6eefc"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="matrix" values="
+        1 0 0 0 0
+        0 1 0 0 0
+        0 0 1 0 0
+        0 0 0 .10 0"/>
+    </filter>
+  </defs>
+
+  <rect width="${W}" height="${H}" fill="url(#bg)"/>
+  <rect width="${W}" height="${H}" filter="url(#grain)" opacity="0.35"/>
+
+  <text x="70" y="86" font-family="Cinzel, serif" font-size="52" font-weight="900" fill="#111827">${safe(title)}</text>
+  <text x="72" y="124" font-family="Crimson Pro, serif" font-size="24" fill="rgba(17,24,39,.70)">${safe(subtitle)}</text>
+
+  ${card(70,160,420,320,"Value Proposition",
+    `<b>What:</b> ${safe(what)}<br/><b>To whom:</b> ${safe(whom)}<br/><b>Price:</b> ${safe(price)}`)}
+
+  ${card(520,160,810,320,"Value Architecture",
+    `<b>Value chain (key steps):</b><br/>${steps.map(s=>`• ${safe(s)}`).join("<br/>")}`)}
+
+  <text x="70" y="560" font-family="Cinzel, serif" font-size="28" font-weight="800" fill="#111827">Value chain flow</text>
+  ${links}
+  ${nodeDraw}
+</svg>`.trim();
+
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
     }
 
     /* ===== SYSTEM CONTEXT ===== */
@@ -540,7 +643,7 @@ Process: move from Reference Offer (current state) to New Business Model by expl
 14 Leverage strategic resources
     `.trim();
 
-    /* ===== MODEL AUTO-DETECT (text only) ===== */
+    /* ===== MODEL AUTO-DETECT ===== */
     const BASE = "https://generativelanguage.googleapis.com/v1beta";
     let SELECTED_MODEL = null;
 
@@ -611,7 +714,7 @@ Process: move from Reference Offer (current state) to New Business Model by expl
         return;
       }
 
-      setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong> · <span style="opacity:.85">Visuals: ✅ (no quota)</span>`);
+      setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong> · <span style="opacity:.85">Visuals: ✅ (meaningful diagrams)</span>`);
     }
 
     /* ===== WIZARD STATE ===== */
@@ -732,13 +835,9 @@ Process: move from Reference Offer (current state) to New Business Model by expl
 
       state.industry = industry;
 
-      // Show visuals immediately (no waiting for AI)
-      await setAutoImage(
-        summaryImg,
-        summaryImgCap,
-        `${industry}, business, industry, infographic, ancient`,
-        `Industry visual: ${industry}`
-      );
+      // Show a “loading” diagram immediately
+      summaryImg.src = svgFallbackDataUri(industry, "Building a VP/VA diagram from the AI snapshot…");
+      summaryImgCap.textContent = `Diagram will be generated from the AI snapshot for: ${industry}`;
 
       setStep(2);
       showScreen("screenSummary");
@@ -779,6 +878,14 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
         state.industrySummary = out;
         renderMarkdownInto(summaryTextEl, out);
         subline.textContent = "Read the snapshot, then continue.";
+
+        // NOW generate the meaningful diagram from the AI output
+        summaryImg.src = renderIndustrySvgFromText(
+          state.industry,
+          "Industry snapshot diagram (auto-built from the AI text)",
+          out
+        );
+        summaryImgCap.textContent = `Diagram generated from the AI snapshot for: ${state.industry}`;
       } catch (e) {
         summaryTextEl.innerHTML = "";
         errorSummary.textContent = String(e.message || e);
@@ -887,7 +994,7 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       summaryImg.src = svgFallbackDataUri("Industry", "Visual placeholder");
       summaryImgCap.textContent = "Visualizing the industry…";
 
-      finalImg.src = svgFallbackDataUri("Concept", "Visual placeholder");
+      finalImg.src = svgFallbackDataUri("Business model", "Visual placeholder");
       finalImgCap.textContent = "Visualizing your concept…";
 
       errorIndustry.textContent = "";
@@ -912,13 +1019,9 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       errorOutput.textContent = "";
       hideDebug();
 
-      // Set concept image immediately (no AI image quota)
-      await setAutoImage(
-        finalImg,
-        finalImgCap,
-        `${state.industry}, concept, product design, service design, innovation, blueprint`,
-        `Concept visual: ${state.industry} innovation`
-      );
+      // Show “loading” diagram immediately
+      finalImg.src = svgFallbackDataUri("New Business Model", "Building a diagram from your generated model…");
+      finalImgCap.textContent = "Diagram will be generated from your final AI output.";
 
       const answered = DIRECTION_QS.map((d, idx) => {
         const a = (state.directions[idx] || "").trim();
@@ -980,6 +1083,14 @@ Constraints:
         const out = await callGeminiText(prompt);
         renderMarkdownInto(finalOutputEl, out);
         subline.textContent = "Done. You can go back and tweak answers, then regenerate.";
+
+        // Meaningful diagram from final output text
+        finalImg.src = renderIndustrySvgFromText(
+          "New Business Model",
+          `Odyssey 3.14 diagram (auto-built from the final AI output)`,
+          out
+        );
+        finalImgCap.textContent = "Diagram generated from your final business model output.";
       } catch (e) {
         finalOutputEl.innerHTML = "";
         errorOutput.textContent = String(e.message || e);
@@ -993,9 +1104,9 @@ Constraints:
     detectModel();
     setStep(1);
 
-    // Preload placeholders so images aren't blank before first run
-    document.getElementById("summaryImg").src = svgFallbackDataUri("Industry", "Visual placeholder");
-    document.getElementById("finalImg").src = svgFallbackDataUri("Concept", "Visual placeholder");
+    // preload placeholders
+    summaryImg.src = svgFallbackDataUri("Industry", "Visual placeholder");
+    finalImg.src = svgFallbackDataUri("Business model", "Visual placeholder");
   </script>
 </body>
 </html>
