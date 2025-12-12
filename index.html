@@ -31,9 +31,9 @@
       --tintA: rgba(255,237,213,0.95);
       --tintB: rgba(243,244,246,0.80);
       --tintC: rgba(243,244,246,1);
-      --bg-img: url("https://upload.wikimedia.org/wikipedia/commons/8/89/OdysseySuitors.png");
-      --bg-op: 0.10;
-      --bg-blur: 0.6px;
+      --bg-img: url("https://commons.wikimedia.org/wiki/Special:FilePath/Ulysses_and_the_Sirens_-_John_William_Waterhouse.jpg?width=2200");
+      --bg-op: 0.14;
+      --bg-blur: 0.4px;
     }
 
     body{
@@ -339,9 +339,9 @@
       <h3>Step 2 — Current industry snapshot</h3>
       <p class="hint">We’ll summarize the current players’ Value Proposition and Value Architecture (high level, no invented data).</p>
 
-      <!-- Meaningful diagram shown by default -->
+      <!-- Industry image shown by default -->
       <div id="summaryImgBlock" class="imgWrap">
-        <img id="summaryImg" alt="Industry diagram" />
+        <img id="summaryImg" alt="Industry image" />
         <div class="imgCap" id="summaryImgCap">Visualizing the industry…</div>
       </div>
 
@@ -392,9 +392,9 @@
     <section class="card screen" id="screenOutput">
       <h3>Step 17 — Your new business model (Odyssey 3.14)</h3>
 
-      <!-- Meaningful diagram shown by default -->
+      <!-- Industry image shown by default -->
       <div id="finalImgBlock" class="imgWrap">
-        <img id="finalImg" alt="Business model diagram" />
+        <img id="finalImg" alt="Industry image" />
         <div class="imgCap" id="finalImgCap">Visualizing your concept…</div>
       </div>
 
@@ -402,7 +402,7 @@
 
       <div class="actions">
         <button id="btnExportMD" class="secondary" type="button">Download Report (.md)</button>
-        <button id="btnExportSVG" class="secondary" type="button">Download Diagram (.svg)</button>
+        <button id="btnExportSVG" class="secondary" type="button">Download Image</button>
         <button id="btnRestart" class="ghost" type="button">Restart</button>
         <button id="btnOutputBack" class="ghost" type="button">Back</button>
       </div>
@@ -421,195 +421,156 @@
     /* ===== CONFIG ===== */
     const GEMINI_API_KEY = "AIzaSyBTkMVWxCcZ1OIUUAqxRcHLGTS7EYoEjNU"; // <-- paste your key here
 
-    /* ===== Background randomizer ===== */
+    /* ===== Background randomizer (MORE Odyssey art + better look) ===== */
     function applyRandomTheme() {
       const root = document.documentElement;
 
-      const gx = Math.floor(10 + Math.random() * 35) + "%";
-      const gy = Math.floor(6 + Math.random() * 22) + "%";
+      const gx = Math.floor(8 + Math.random() * 45) + "%";
+      const gy = Math.floor(6 + Math.random() * 30) + "%";
       root.style.setProperty("--g1x", gx);
       root.style.setProperty("--g1y", gy);
 
       const palettes = [
         { a:"rgba(255,237,213,0.95)", b:"rgba(243,244,246,0.82)", c:"rgba(243,244,246,1)" },
-        { a:"rgba(224,242,254,0.80)", b:"rgba(243,244,246,0.86)", c:"rgba(243,244,246,1)" },
-        { a:"rgba(254,243,199,0.90)", b:"rgba(243,244,246,0.84)", c:"rgba(243,244,246,1)" },
-        { a:"rgba(255,228,230,0.75)", b:"rgba(243,244,246,0.88)", c:"rgba(243,244,246,1)" },
+        { a:"rgba(224,242,254,0.85)", b:"rgba(243,244,246,0.86)", c:"rgba(243,244,246,1)" },
+        { a:"rgba(254,243,199,0.92)", b:"rgba(243,244,246,0.84)", c:"rgba(243,244,246,1)" },
+        { a:"rgba(255,228,230,0.80)", b:"rgba(243,244,246,0.88)", c:"rgba(243,244,246,1)" },
+        { a:"rgba(220,252,231,0.75)", b:"rgba(243,244,246,0.88)", c:"rgba(243,244,246,1)" },
       ];
       const p = palettes[Math.floor(Math.random() * palettes.length)];
       root.style.setProperty("--tintA", p.a);
       root.style.setProperty("--tintB", p.b);
       root.style.setProperty("--tintC", p.c);
 
+      // More Odyssey/Ulysses variations
       const overlays = [
-        "https://upload.wikimedia.org/wikipedia/commons/8/89/OdysseySuitors.png",
-        "https://upload.wikimedia.org/wikipedia/commons/0/06/Odysseus_Returns.jpg",
-        "https://upload.wikimedia.org/wikipedia/commons/6/6f/Odysseus_by_Guerin.jpg",
-        "https://upload.wikimedia.org/wikipedia/commons/3/3e/Ulysses_and_the_Sirens_-_John_William_Waterhouse.jpg"
+        "https://commons.wikimedia.org/wiki/Special:FilePath/OdysseySuitors.png?width=2200",
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Odysseus_Returns.jpg?width=2200",
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Odysseus_by_Guerin.jpg?width=2200",
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Ulysses_and_the_Sirens_-_John_William_Waterhouse.jpg?width=2200",
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Alessandro_Allori_-_Odysseus_questions_the_seer_Tiresias.jpg?width=2200",
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Odysseus_recognises_Achilles_amongst_the_daughters_of_Lycomedes,_by_Louis_Gauffier.jpg?width=2200",
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Tapestry_with_Odysseus_on_a_hunt_by_Brussels_workshop,_17th_century_PD-art_-old,_Olesko_Castle,_possibly_from_John_III_Sobieski%27s_collection.jpg?width=2200"
       ];
+
       const img = overlays[Math.floor(Math.random() * overlays.length)];
       root.style.setProperty("--bg-img", `url("${img}")`);
 
-      const op = (0.08 + Math.random() * 0.06).toFixed(2);
+      const op = (0.10 + Math.random() * 0.08).toFixed(2);  // 0.10–0.18
       root.style.setProperty("--bg-op", op);
-      root.style.setProperty("--bg-blur", (0.4 + Math.random() * 0.8).toFixed(1) + "px");
+      root.style.setProperty("--bg-blur", (0.2 + Math.random() * 0.6).toFixed(1) + "px");
     }
 
-    /* ===== Safe fallback SVG (generic) ===== */
-    function svgFallbackDataUri(title, subtitle) {
-      const safeTitle = (title || "").replace(/[<>&"]/g, "");
-      const safeSub = (subtitle || "").replace(/[<>&"]/g, "");
+    /* ===== Pretty placeholder while loading an industry image ===== */
+    function prettyLoadingSvgDataUri(title, subtitle) {
+      const safe = (s) => (s || "").replace(/[<>&"]/g, "");
       const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="700" viewBox="0 0 1400 700">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f8e7c7"/>
-      <stop offset="1" stop-color="#e6eefc"/>
-    </linearGradient>
-    <filter id="grain">
-      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
-      <feColorMatrix type="matrix" values="
-        1 0 0 0 0
-        0 1 0 0 0
-        0 0 1 0 0
-        0 0 0 .10 0"/>
-    </filter>
-  </defs>
-  <rect width="1400" height="700" fill="url(#g)"/>
-  <rect width="1400" height="700" filter="url(#grain)" opacity="0.35"/>
-  <path d="M120 520 C 320 420, 420 560, 620 470 S 980 420, 1260 510" fill="none" stroke="rgba(37,99,235,.30)" stroke-width="10"/>
-  <circle cx="260" cy="470" r="34" fill="rgba(37,99,235,.20)" stroke="rgba(17,24,39,.15)" stroke-width="2"/>
-  <circle cx="700" cy="470" r="34" fill="rgba(37,99,235,.20)" stroke="rgba(17,24,39,.15)" stroke-width="2"/>
-  <circle cx="1120" cy="500" r="34" fill="rgba(37,99,235,.20)" stroke="rgba(17,24,39,.15)" stroke-width="2"/>
-  <text x="90" y="150" font-family="Cinzel, serif" font-size="54" font-weight="800" fill="#111827">${safeTitle}</text>
-  <text x="92" y="200" font-family="Crimson Pro, serif" font-size="28" fill="rgba(17,24,39,.75)">${safeSub}</text>
-  <text x="92" y="255" font-family="Crimson Pro, serif" font-size="20" fill="rgba(17,24,39,.60)">Generating a meaningful diagram from AI output…</text>
-</svg>`;
+      <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fde68a"/>
+            <stop offset="0.45" stop-color="#e0e7ff"/>
+            <stop offset="1" stop-color="#dcfce7"/>
+          </linearGradient>
+          <filter id="grain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+            <feColorMatrix type="matrix" values="
+              1 0 0 0 0
+              0 1 0 0 0
+              0 0 1 0 0
+              0 0 0 .12 0"/>
+          </filter>
+        </defs>
+        <rect width="1600" height="900" fill="url(#bg)"/>
+        <rect width="1600" height="900" filter="url(#grain)" opacity="0.35"/>
+        <text x="90" y="180" font-family="Cinzel, serif" font-size="64" font-weight="900" fill="#111827">${safe(title)}</text>
+        <text x="92" y="240" font-family="Crimson Pro, serif" font-size="30" fill="rgba(17,24,39,.75)">${safe(subtitle)}</text>
+        <text x="92" y="295" font-family="Crimson Pro, serif" font-size="22" fill="rgba(17,24,39,.60)">Finding a fun, relevant image…</text>
+        <path d="M120 720 C 360 560, 520 820, 760 670 S 1200 560, 1460 700" fill="none" stroke="rgba(37,99,235,.25)" stroke-width="14"/>
+        <circle cx="300" cy="650" r="36" fill="rgba(37,99,235,.18)" stroke="rgba(17,24,39,.14)" stroke-width="2"/>
+        <circle cx="800" cy="670" r="36" fill="rgba(37,99,235,.18)" stroke="rgba(17,24,39,.14)" stroke-width="2"/>
+        <circle cx="1260" cy="690" r="36" fill="rgba(37,99,235,.18)" stroke="rgba(17,24,39,.14)" stroke-width="2"/>
+      </svg>`;
       return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.trim());
     }
 
-    /* ===== IMPROVED SVG diagram FROM AI TEXT ===== */
-    function renderIndustrySvgFromText(title, subtitle, mdText) {
-      const text = (mdText || "").replace(/\r/g, "");
+    /* ===== Industry image fetcher (Wikipedia -> fallback) ===== */
+    async function fetchWikipediaThumb(query) {
+      const q = encodeURIComponent(query);
+      const url =
+        `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${q}` +
+        `&gsrlimit=6&prop=pageimages|info&inprop=url&pithumbsize=1600&format=json&origin=*`;
 
-      // Helper: flexible search for a line following a key pattern
-      function findValue(keyPatterns) {
-        for (const pattern of keyPatterns) {
-          // Look for: pattern (colon/dash/newline) (content)
-          const re = new RegExp(`(?:\\n|^|[*\\-])\\s*${pattern}\\s*[:\\-–]?\\s*(.*)`, "i");
-          const m = text.match(re);
-          if (m && m[1] && m[1].trim().length > 3) {
-            // cleanup leading bold chars if any
-            return m[1].trim().replace(/^\*\*|^\*/, "").replace(/\*\*$/, "").trim();
-          }
-        }
-        return "";
-      }
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Wikipedia image search failed.");
+      const data = await res.json();
 
-      // 1. Extract VP items
-      let what = findValue(["what", "offer", "product"]);
-      let whom = findValue(["to whom", "target", "customer", "segment"]);
-      let price = findValue(["at what price", "price", "pricing", "revenue model"]);
+      const pages = data?.query?.pages ? Object.values(data.query.pages) : [];
+      const withThumb = pages.filter(p => p?.thumbnail?.source);
+      if (!withThumb.length) return null;
 
-      if (!what) what = "Primary Offer / Service";
-      if (!whom) whom = "Target Segment";
-      if (!price) price = "Pricing Scheme";
-
-      // 2. Extract Value Chain Steps (List parsing)
-      let steps = [];
-      // Attempt to find "Value chain" section and grab bullets
-      // We look for "Value chain" header, then grab subsequent lines starting with * or -
-      const chainMatch = text.match(/(?:value chain|key steps).*?(?:\n|$)([\s\S]*?)(?=\n##|\n\*\*value network|\n\*\*strategic|$)/i);
-      
-      if (chainMatch && chainMatch[1]) {
-        const rawList = chainMatch[1];
-        // split by newline, filter for bullets
-        steps = rawList.split("\n")
-          .map(l => l.trim())
-          .filter(l => /^[-*•\d\.]+\s+/.test(l)) // strict bullet check
-          .map(l => l.replace(/^[-*•\d\.]+\s+/, "").replace(/\*\*/g, "").trim())
-          .filter(Boolean)
-          .slice(0, 6); // max 6 steps
-      }
-
-      // Fallback if no bullets found
-      if (steps.length === 0) steps = ["Design", "Source", "Produce", "Market", "Distribute"];
-
-      const safe = (s) => (s || "").replace(/[<>&"]/g, "");
-      const W = 1400, H = 760;
-
-      const card = (x,y,w,h,heading,bodyHtml) => `
-        <g>
-          <rect x="${x}" y="${y}" rx="18" ry="18" width="${w}" height="${h}"
-            fill="rgba(255,255,255,0.78)" stroke="rgba(17,24,39,0.15)" />
-          <text x="${x+22}" y="${y+44}" font-size="30" font-weight="800" font-family="Cinzel, serif" fill="#111827">${safe(heading)}</text>
-          <foreignObject x="${x+22}" y="${y+62}" width="${w-44}" height="${h-76}">
-            <div xmlns="http://www.w3.org/1999/xhtml"
-              style="font-family:'Crimson Pro',serif;font-size:22px;line-height:1.25;color:rgba(17,24,39,.82);">
-              ${bodyHtml}
-            </div>
-          </foreignObject>
-        </g>
-      `;
-
-      // Layout nodes across bottom
-      const nodes = steps.map((s,i)=>{
-        const x = 140 + i * ((W-280)/Math.max(steps.length-1,1));
-        const y = 600;
-        return { s, x, y };
+      withThumb.sort((a, b) => {
+        const aw = a.thumbnail?.width || 0, ah = a.thumbnail?.height || 0;
+        const bw = b.thumbnail?.width || 0, bh = b.thumbnail?.height || 0;
+        return (bw * bh) - (aw * ah);
       });
 
-      const links = nodes.slice(0,-1).map((_,i)=>{
-        const a = nodes[i], b = nodes[i+1];
-        return `<path d="M ${a.x} ${a.y} C ${a.x+80} ${a.y-90}, ${b.x-80} ${b.y-90}, ${b.x} ${b.y}"
-          fill="none" stroke="rgba(37,99,235,0.38)" stroke-width="10" />`;
-      }).join("");
+      return {
+        src: withThumb[0].thumbnail.source,
+        pageUrl: withThumb[0].fullurl || "",
+        title: withThumb[0].title || query
+      };
+    }
 
-      const nodeDraw = nodes.map(n=>`
-        <g>
-          <circle cx="${n.x}" cy="${n.y}" r="34" fill="rgba(37,99,235,0.18)" stroke="rgba(17,24,39,0.14)" stroke-width="2"/>
-          <text x="${n.x}" y="${n.y+8}" text-anchor="middle"
-            font-family="Crimson Pro,serif" font-size="18" font-weight="700" fill="#111827">
-            ${safe(n.s).slice(0,18)}
-          </text>
-        </g>
-      `).join("");
+    function unsplashFallback(query) {
+      const q = encodeURIComponent(query.replace(/[^\w\s-]/g, "").trim());
+      return `https://source.unsplash.com/1600x900/?${q}`;
+    }
 
-      const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f8e7c7"/>
-      <stop offset="1" stop-color="#e6eefc"/>
-    </linearGradient>
-    <filter id="grain">
-      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/>
-      <feColorMatrix type="matrix" values="
-        1 0 0 0 0
-        0 1 0 0 0
-        0 0 1 0 0
-        0 0 0 .10 0"/>
-    </filter>
-  </defs>
+    async function setIndustryImageEverywhere(industry) {
+      const loading = prettyLoadingSvgDataUri(industry, "Loading an industry image…");
+      summaryImg.src = loading;
+      finalImg.src = loading;
 
-  <rect width="${W}" height="${H}" fill="url(#bg)"/>
-  <rect width="${W}" height="${H}" filter="url(#grain)" opacity="0.35"/>
+      summaryImgCap.textContent = `Finding a fun image for: ${industry}`;
+      finalImgCap.textContent = `Finding a fun image for: ${industry}`;
 
-  <text x="70" y="86" font-family="Cinzel, serif" font-size="52" font-weight="900" fill="#111827">${safe(title)}</text>
-  <text x="72" y="124" font-family="Crimson Pro, serif" font-size="24" fill="rgba(17,24,39,.70)">${safe(subtitle)}</text>
+      try {
+        const tries = [
+          industry,
+          `${industry} product`,
+          `${industry} equipment`,
+          `${industry} tool`
+        ];
 
-  ${card(70,160,420,320,"Value Proposition",
-    `<b>What:</b> ${safe(what)}<br/><b>To whom:</b> ${safe(whom)}<br/><b>Price:</b> ${safe(price)}`)}
+        let picked = null;
+        for (const t of tries) {
+          picked = await fetchWikipediaThumb(t);
+          if (picked?.src) break;
+        }
 
-  ${card(520,160,810,320,"Value Architecture",
-    `<b>Value chain (key steps):</b><br/>${steps.map(s=>`• ${safe(s)}`).join("<br/>")}`)}
+        const src = picked?.src || unsplashFallback(industry);
 
-  <text x="70" y="560" font-family="Cinzel, serif" font-size="28" font-weight="800" fill="#111827">Value chain flow</text>
-  ${links}
-  ${nodeDraw}
-</svg>`.trim();
+        summaryImg.src = src;
+        finalImg.src = src;
 
-      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+        const cap = picked?.pageUrl
+          ? `Image: ${picked.title} (Wikipedia/Wikimedia)`
+          : `Image: ${industry} (Unsplash fallback)`;
+
+        summaryImgCap.textContent = cap;
+        finalImgCap.textContent = cap;
+
+        // Reuse existing state slot for “Download Image”
+        state.finalSvgData = src; // now holds an image URL
+      } catch {
+        const src = unsplashFallback(industry);
+        summaryImg.src = src;
+        finalImg.src = src;
+        summaryImgCap.textContent = `Image: ${industry} (fallback)`;
+        finalImgCap.textContent = `Image: ${industry} (fallback)`;
+        state.finalSvgData = src;
+      }
     }
 
     /* ===== SYSTEM CONTEXT ===== */
@@ -690,10 +651,7 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       hideDebug();
       setModelBadge("Model: (detecting…)");
 
-      // NOTE: We will likely want to change how this key is retrieved
-      // if we add a UI input for it.
       let keyToUse = GEMINI_API_KEY; 
-      
       if (!keyToUse || keyToUse === "PUT_YOUR_KEY_HERE") {
         setModelBadge("Model: (missing API key)");
         return;
@@ -720,7 +678,7 @@ Process: move from Reference Offer (current state) to New Business Model by expl
         return;
       }
 
-      setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong> · <span style="opacity:.85">Visuals: ✅ (meaningful diagrams)</span>`);
+      setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong> · <span style="opacity:.85">Visuals: ✅ (industry images)</span>`);
     }
 
     /* ===== WIZARD STATE ===== */
@@ -729,8 +687,8 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       industrySummary: "",
       underservedIdea: "",
       directions: Array.from({length: 14}, () => ""),
-      finalModelText: "", // New state to hold text for export
-      finalSvgData: "",   // New state to hold svg for export
+      finalModelText: "",
+      finalSvgData: "", // now used to store the final image URL for download
     };
 
     const TOTAL_STEPS = 17;
@@ -787,7 +745,6 @@ Process: move from Reference Offer (current state) to New Business Model by expl
     }
 
     async function callGeminiText(promptText) {
-      // Logic will need to access the dynamic key if we add the UI
       let keyToUse = GEMINI_API_KEY;
 
       if (!SELECTED_MODEL) throw new Error("No model selected. Click Re-check model.");
@@ -846,9 +803,11 @@ Process: move from Reference Offer (current state) to New Business Model by expl
 
       state.industry = industry;
 
-      // Show a “loading” diagram immediately
-      summaryImg.src = svgFallbackDataUri(industry, "Building a VP/VA diagram from the AI snapshot…");
-      summaryImgCap.textContent = `Diagram will be generated from the AI snapshot for: ${industry}`;
+      // ✅ Change Odyssey background on every submit
+      applyRandomTheme();
+
+      // ✅ Set a fun industry-relevant image on both Summary + Final screens (independent of AI)
+      setIndustryImageEverywhere(industry);
 
       setStep(2);
       showScreen("screenSummary");
@@ -889,14 +848,7 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
         state.industrySummary = out;
         renderMarkdownInto(summaryTextEl, out);
         subline.textContent = "Read the snapshot, then continue.";
-
-        // NOW generate the meaningful diagram from the AI output
-        summaryImg.src = renderIndustrySvgFromText(
-          state.industry,
-          "Industry snapshot diagram (auto-built from the AI text)",
-          out
-        );
-        summaryImgCap.textContent = `Diagram generated from the AI snapshot for: ${state.industry}`;
+        // ✅ We do NOT generate diagrams anymore (image stays industry-based)
       } catch (e) {
         summaryTextEl.innerHTML = "";
         errorSummary.textContent = String(e.message || e);
@@ -1006,10 +958,11 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       summaryTextEl.innerHTML = "";
       finalOutputEl.innerHTML = "";
 
-      summaryImg.src = svgFallbackDataUri("Industry", "Visual placeholder");
+      // Reset visuals to pleasant placeholders
+      summaryImg.src = prettyLoadingSvgDataUri("Industry", "Enter an industry to load an image…");
       summaryImgCap.textContent = "Visualizing the industry…";
 
-      finalImg.src = svgFallbackDataUri("Business model", "Visual placeholder");
+      finalImg.src = prettyLoadingSvgDataUri("Business model", "Enter an industry to load an image…");
       finalImgCap.textContent = "Visualizing your concept…";
 
       errorIndustry.textContent = "";
@@ -1018,6 +971,8 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       errorDir.textContent = "";
       errorOutput.textContent = "";
       hideDebug();
+
+      applyRandomTheme();
 
       setStep(1);
       subline.textContent = "Start by choosing an industry. You can skip any Direction question.";
@@ -1042,24 +997,30 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       URL.revokeObjectURL(url);
     }
 
-    // Helper: Download data URI as image
-    function downloadDataUri(uri, filename) {
-      const a = document.createElement("a");
-      a.href = uri;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
     btnExportMD.addEventListener("click", () => {
       if (!state.finalModelText) return;
       downloadStringAsFile(state.finalModelText, `Odyssey314_${state.industry.replace(/\s/g,"_")}.md`);
     });
 
-    btnExportSVG.addEventListener("click", () => {
-      if (!state.finalSvgData) return;
-      downloadDataUri(state.finalSvgData, `Odyssey314_Diagram_${state.industry.replace(/\s/g,"_")}.svg`);
+    // Download the industry image (best effort; may open new tab if CORS blocks fetch)
+    btnExportSVG.addEventListener("click", async () => {
+      const src = state.finalSvgData; // now holds an image URL
+      if (!src) return;
+
+      try {
+        const r = await fetch(src, { mode: "cors" });
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Odyssey314_Image_${state.industry.replace(/\s/g,"_")}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch {
+        window.open(src, "_blank");
+      }
     });
 
     async function generateFinalModel() {
@@ -1067,9 +1028,8 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       errorOutput.textContent = "";
       hideDebug();
 
-      // Show “loading” diagram immediately
-      finalImg.src = svgFallbackDataUri("New Business Model", "Building a diagram from your generated model…");
-      finalImgCap.textContent = "Diagram will be generated from your final AI output.";
+      // Keep the same industry image (no diagrams)
+      finalImgCap.textContent = "Image matches your chosen industry.";
 
       const answered = DIRECTION_QS.map((d, idx) => {
         const a = (state.directions[idx] || "").trim();
@@ -1129,19 +1089,10 @@ Constraints:
 
       try {
         const out = await callGeminiText(prompt);
-        state.finalModelText = out; // Save for export
+        state.finalModelText = out;
         renderMarkdownInto(finalOutputEl, out);
         subline.textContent = "Done. You can go back and tweak answers, then regenerate.";
-
-        // Meaningful diagram from final output text
-        const svgData = renderIndustrySvgFromText(
-          "New Business Model",
-          `Odyssey 3.14 diagram (auto-built from the final AI output)`,
-          out
-        );
-        state.finalSvgData = svgData; // Save for export
-        finalImg.src = svgData;
-        finalImgCap.textContent = "Diagram generated from your final business model output.";
+        // ✅ No diagram generation here
       } catch (e) {
         finalOutputEl.innerHTML = "";
         errorOutput.textContent = String(e.message || e);
@@ -1155,9 +1106,9 @@ Constraints:
     detectModel();
     setStep(1);
 
-    // preload placeholders
-    summaryImg.src = svgFallbackDataUri("Industry", "Visual placeholder");
-    finalImg.src = svgFallbackDataUri("Business model", "Visual placeholder");
+    // preload pleasant placeholders
+    summaryImg.src = prettyLoadingSvgDataUri("Industry", "Enter an industry to load an image…");
+    finalImg.src = prettyLoadingSvgDataUri("Business model", "Enter an industry to load an image…");
   </script>
 </body>
 </html>
