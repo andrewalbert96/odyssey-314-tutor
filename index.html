@@ -5,44 +5,34 @@
   <title>Odyssey 3.14 AI Tutor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f3f4f6;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-    }
-    .container {
-      max-width: 900px;
-      width: 100%;
-      padding: 24px;
-    }
-    textarea { width: 100%; min-height: 150px; }
-    button {
-      margin-top: 12px;
-      padding: 10px 18px;
-      border-radius: 999px;
-      border: none;
-      background: #2563eb;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .error { color: #b91c1c; margin-top: 8px; }
-    .card {
-      margin-top: 20px;
-      padding: 16px;
-      background: white;
-      border-radius: 12px;
-    }
-    pre { white-space: pre-wrap; }
+    body { font-family: system-ui, sans-serif; background:#f3f4f6; margin:0; display:flex; justify-content:center; }
+    .container { max-width: 900px; width:100%; padding:24px; }
+    textarea { width:100%; min-height:150px; padding:10px; border:1px solid #d1d5db; border-radius:8px; box-sizing:border-box; }
+    select { width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px; box-sizing:border-box; }
+    button { margin-top:12px; padding:10px 18px; border-radius:999px; border:none; background:#2563eb; color:#fff; font-weight:600; cursor:pointer; }
+    button:disabled { opacity:0.6; cursor:default; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .badge { display:inline-block; padding:4px 10px; border:1px solid #e5e7eb; border-radius:999px; background:#fff; font-size:12px; color:#374151; }
+    .error { color:#b91c1c; margin-top:8px; white-space:pre-wrap; }
+    .card { margin-top:20px; padding:16px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; }
+    pre { white-space:pre-wrap; margin:0; }
+    h1 { margin:0 0 4px 0; }
+    p { margin:0 0 12px 0; color:#6b7280; }
+    label { font-weight:600; display:block; margin-top:14px; margin-bottom:6px; }
   </style>
 </head>
 
 <body>
 <div class="container">
   <h1>Odyssey 3.14 AI Tutor</h1>
+  <p>Pick a step, paste your draft, get feedback. (This version auto-detects the best available Gemini model.)</p>
 
+  <div class="row">
+    <span class="badge" id="modelBadge">Model: (detecting…)</span>
+    <button id="refreshModelsBtn" type="button">Re-check models</button>
+  </div>
+
+  <label>Which Odyssey 3.14 step?</label>
   <select id="step">
     <option>Vision</option>
     <option>Business arena</option>
@@ -55,71 +45,197 @@
     <option>Innovation levers</option>
   </select>
 
-  <textarea id="draft" placeholder="Write your draft here"></textarea>
-  <button id="btn">Get feedback</button>
+  <label>Your draft</label>
+  <textarea id="draft" placeholder="Write your draft here…"></textarea>
 
+  <button id="btn" type="button">Get feedback</button>
   <div id="error" class="error"></div>
+
   <div id="card" class="card" style="display:none;">
+    <h3 style="margin-top:0;">AI feedback</h3>
     <pre id="output"></pre>
+  </div>
+
+  <div id="debug" class="card" style="display:none;">
+    <h3 style="margin-top:0;">Debug</h3>
+    <pre id="debugText"></pre>
   </div>
 </div>
 
 <script>
-/* === CONFIG === */
-const GEMINI_API_KEY = "AIzaSyDcOqoV01wcmFJPF8GYS1Y4CBCK9z8gOww";
-const MODEL = "models/gemini-pro";
+/* ===== CONFIG ===== */
+const GEMINI_API_KEY = "AIzaSyDcOqoV01wcmFJPF8GYS1Y4CBCK9z8gOww"; // <-- paste your key here
 
-/* === APP === */
+/* ===== CONSTANTS ===== */
+const BASE = "https://generativelanguage.googleapis.com/v1beta";
+let SELECTED_MODEL = null;
+
 const btn = document.getElementById("btn");
+const refreshModelsBtn = document.getElementById("refreshModelsBtn");
 const error = document.getElementById("error");
 const card = document.getElementById("card");
 const output = document.getElementById("output");
+const modelBadge = document.getElementById("modelBadge");
+const debug = document.getElementById("debug");
+const debugText = document.getElementById("debugText");
 
-btn.onclick = async () => {
-  error.textContent = "";
+function showError(msg) {
+  error.textContent = msg || "";
+}
+function showDebug(obj) {
+  debug.style.display = "block";
+  debugText.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+}
+function hideDebug() {
+  debug.style.display = "none";
+  debugText.textContent = "";
+}
+function setModelBadge(text) {
+  modelBadge.textContent = text;
+}
+
+/** Pick the best model from ListModels results.
+ * We only pick models that support "generateContent".
+ * Preference order: flash > pro > anything else.
+ */
+function pickBestModel(models) {
+  const usable = (models || []).filter(m =>
+    Array.isArray(m.supportedGenerationMethods) &&
+    m.supportedGenerationMethods.includes("generateContent") &&
+    typeof m.name === "string"
+  );
+
+  if (usable.length === 0) return null;
+
+  // preference scoring
+  const score = (name) => {
+    const n = name.toLowerCase();
+    if (n.includes("flash")) return 300;
+    if (n.includes("pro")) return 200;
+    return 100;
+  };
+
+  usable.sort((a, b) => score(b.name) - score(a.name));
+  return usable[0].name; // e.g. "models/gemini-pro"
+}
+
+async function detectModel() {
+  hideDebug();
+  showError("");
+  setModelBadge("Model: (detecting…)");
+
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === "PUT_YOUR_KEY_HERE") {
+    setModelBadge("Model: (missing API key)");
+    showError("Paste your Gemini API key into GEMINI_API_KEY first.");
+    return;
+  }
+
+  const url = `${BASE}/models?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+
+  const res = await fetch(url);
+  const text = await res.text();
+
+  if (!res.ok) {
+    setModelBadge("Model: (not available)");
+    showError(`Model list failed (${res.status}).`);
+    showDebug(text);
+    SELECTED_MODEL = null;
+    return;
+  }
+
+  let data;
+  try { data = JSON.parse(text); } catch { data = { raw: text }; }
+
+  const models = data.models || [];
+  const best = pickBestModel(models);
+
+  if (!best) {
+    setModelBadge("Model: (none found)");
+    showError("No models with generateContent are available for this key.");
+    showDebug(data);
+    SELECTED_MODEL = null;
+    return;
+  }
+
+  SELECTED_MODEL = best;
+  setModelBadge(`Model: ${SELECTED_MODEL}`);
+}
+
+async function generateFeedback() {
+  showError("");
+  hideDebug();
   card.style.display = "none";
+
+  if (!SELECTED_MODEL) {
+    showError("No model selected yet. Click “Re-check models” first.");
+    return;
+  }
 
   const step = document.getElementById("step").value;
   const draft = document.getElementById("draft").value.trim();
   if (!draft) {
-    error.textContent = "Write something first.";
+    showError("Write something first.");
     return;
   }
 
   const prompt = `
-You are a tutor for the Odyssey 3.14 framework.
+You are an AI tutor helping students apply the Odyssey 3.14 business model innovation approach.
 
 Step: ${step}
-Student text:
+Student draft:
 ${draft}
 
-Give:
-1. Short evaluation
-2. 3 improvement suggestions
-3. Checklist
-`;
+Respond with:
+1) Quick evaluation (3–4 sentences)
+2) Suggestions (3–5 numbered, specific actions)
+3) Checklist (4–6 bullets starting with [ ] or [x])
+Keep it under ~300 words.
+  `.trim();
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-    {
+  btn.disabled = true;
+  btn.textContent = "Getting feedback…";
+
+  try {
+    const url = `${BASE}/${SELECTED_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }]
       })
+    });
+
+    const raw = await res.text();
+
+    if (!res.ok) {
+      showError(`Gemini error ${res.status}`);
+      showDebug(raw);
+      return;
     }
-  );
 
-  if (!res.ok) {
-    const t = await res.text();
-    error.textContent = `Gemini error ${res.status}: ${t}`;
-    return;
+    let data;
+    try { data = JSON.parse(raw); } catch { data = { raw }; }
+
+    const out =
+      data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("\n") ||
+      "No response text returned.";
+
+    output.textContent = out;
+    card.style.display = "block";
+
+  } catch (e) {
+    showError(String(e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Get feedback";
   }
+}
 
-  const data = await res.json();
-  output.textContent = data.candidates[0].content.parts[0].text;
-  card.style.display = "block";
-};
+refreshModelsBtn.addEventListener("click", detectModel);
+btn.addEventListener("click", generateFeedback);
+
+// Auto-detect on load
+detectModel();
 </script>
 </body>
 </html>
