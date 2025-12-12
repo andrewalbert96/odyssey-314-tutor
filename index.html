@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Odyssey 3.14 Business Model Coach</title>
+  <title>Odyssey 3.14 Innovation Wizard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Epic/classic fonts -->
@@ -51,7 +51,7 @@
     }
 
     .container{
-      max-width: 1060px;
+      max-width: 980px;
       width:100%;
       padding: 28px 18px 44px;
     }
@@ -77,58 +77,6 @@
       color: var(--muted);
       font-size: 14px;
       margin: 0;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:14px;
-      margin-top: 12px;
-    }
-    @media (min-width: 960px){
-      .grid{ grid-template-columns: 1fr 1fr; }
-    }
-
-    .card{
-      padding: 16px 18px;
-      border-radius: 18px;
-      background: var(--paper-strong);
-      border: 1px solid var(--border);
-      box-shadow: 0 16px 40px rgba(17,24,39,0.10);
-    }
-
-    .card h3{
-      margin: 0 0 10px 0;
-      font-family: "Cinzel", ui-serif, serif;
-      letter-spacing: 0.01em;
-      font-weight: 800;
-      font-size: 18px;
-    }
-
-    label{
-      display:block;
-      margin-top: 12px;
-      margin-bottom: 6px;
-      font-weight: 800;
-    }
-
-    input[type="text"], textarea{
-      width:100%;
-      box-sizing:border-box;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--paper);
-      outline:none;
-      transition: box-shadow .15s ease, border-color .15s ease;
-      font-family: inherit;
-      font-size: 16px;
-    }
-    textarea{ min-height: 120px; resize: vertical; }
-
-    input:focus, textarea:focus{
-      border-color: rgba(37,99,235,0.55);
-      box-shadow: 0 0 0 4px rgba(37,99,235,0.14);
     }
 
     .row{
@@ -158,6 +106,65 @@
       border-radius: 999px;
       background: rgba(37,99,235,0.8);
       box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    }
+
+    .progress{
+      flex: 1;
+      min-width: 220px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(17,24,39,0.08);
+      border: 1px solid rgba(17,24,39,0.06);
+      overflow:hidden;
+    }
+    .progress > div{
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width .25s ease;
+    }
+
+    .card{
+      margin-top: 14px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: var(--paper-strong);
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(17,24,39,0.10);
+    }
+
+    .card h3{
+      margin: 0 0 10px 0;
+      font-family: "Cinzel", ui-serif, serif;
+      letter-spacing: 0.01em;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    label{
+      display:block;
+      margin-top: 10px;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    input[type="text"], textarea{
+      width:100%;
+      box-sizing:border-box;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--paper);
+      outline:none;
+      transition: box-shadow .15s ease, border-color .15s ease;
+      font-family: inherit;
+      font-size: 16px;
+    }
+    textarea{ min-height: 130px; resize: vertical; }
+
+    input:focus, textarea:focus{
+      border-color: rgba(37,99,235,0.55);
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.14);
     }
 
     .actions{
@@ -191,42 +198,24 @@
       font-weight: 800;
     }
 
+    .ghost{
+      background: transparent;
+      color: var(--ink);
+      border: 1px dashed rgba(17,24,39,0.25);
+      box-shadow: none;
+      font-weight: 800;
+    }
+
     .error{
       color: var(--danger);
       margin-top: 10px;
       font-weight: 800;
       white-space: pre-wrap;
     }
-
     .ok{
       color: var(--ok);
       margin-top: 10px;
       font-weight: 800;
-    }
-
-    .checks{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:8px;
-      margin-top: 10px;
-    }
-    @media (min-width: 960px){
-      .checks{ grid-template-columns: 1fr 1fr; }
-    }
-
-    .check{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      padding:10px 12px;
-      border:1px solid var(--border);
-      border-radius:14px;
-      background: var(--paper);
-    }
-
-    .check input{
-      margin-top: 3px;
-      transform: scale(1.1);
     }
 
     pre{
@@ -234,7 +223,7 @@
       word-wrap: break-word;
       margin:0;
       font-size: 16px;
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     .hint{
@@ -242,80 +231,106 @@
       font-size: 13px;
       margin-top: 6px;
     }
+
+    .screen{ display:none; }
+    .screen.active{ display:block; }
   </style>
 </head>
 
 <body>
   <div class="container">
     <header>
-      <h1>Odyssey 3.14 Business Model Coach</h1>
-      <h2>From “Reference Offer” → “New Business Model” using the 14 Directions + Contributions evaluation.</h2>
-      <p class="small">This page auto-detects the best Gemini model your API key can use.</p>
+      <h1>Odyssey 3.14 Innovation Wizard</h1>
+      <h2>Explore an industry → uncover gaps → run the 14 Directions → output a new business model.</h2>
+
       <div class="row">
         <span class="badge" id="modelBadge"><span class="dot"></span>Model: (detecting…)</span>
+        <div class="progress" aria-label="Progress">
+          <div id="progressBar"></div>
+        </div>
+        <span class="badge" id="stepBadge">Step 1/17</span>
       </div>
+
+      <p class="small" id="subline">Start by choosing an industry. You can skip any Direction question.</p>
     </header>
 
-    <div class="grid">
-      <section class="card">
-        <h3>Reference Offer</h3>
+    <!-- Screen 1: Industry -->
+    <section class="card screen active" id="screenIndustry">
+      <h3>Step 1 — Choose an industry</h3>
+      <label for="industryInput">What is an industry you are interested in innovating within?</label>
+      <input id="industryInput" type="text" placeholder="e.g., fast fashion, coffee shops, private tutoring, food delivery…" />
+      <div class="hint">Be specific if you can (e.g., “budget airlines in Europe” instead of “airlines”).</div>
 
-        <label for="vp">1) Value Proposition (What / To whom / At what price)</label>
-        <textarea id="vp" placeholder="Describe the current offer, target customers, and pricing..."></textarea>
+      <div class="actions">
+        <button id="btnIndustryNext" type="button">Continue</button>
+        <button id="refreshModelsBtn" class="secondary" type="button">Re-check model</button>
+      </div>
 
-        <label for="va">2) Value Architecture (Value chain / network / strategic resources)</label>
-        <textarea id="va" placeholder="How it is produced and delivered; key partners; capabilities..."></textarea>
-
-        <label for="pe">3) Profit Equation (Revenue / Costs / Capital employed)</label>
-        <textarea id="pe" placeholder="Where money comes from, major costs, assets/working capital needed..."></textarea>
-
-        <label for="constraints">Constraints (optional)</label>
-        <textarea id="constraints" placeholder="What must NOT change? (budget, regulation, brand, geography, timing...)"></textarea>
-
-        <label for="goals">Objectives (optional)</label>
-        <textarea id="goals" placeholder="What do you want to improve? (profit, CO2 reduction, access, employability...)"></textarea>
-
-        <div class="actions">
-          <button id="generateBtn" type="button">Generate New Business Model</button>
-          <button id="refreshModelsBtn" class="secondary" type="button">Re-check model</button>
-        </div>
-
-        <div id="status" class="ok" style="display:none;"></div>
-        <div id="error" class="error"></div>
-      </section>
-
-      <section class="card">
-        <h3>Choose Innovation Directions</h3>
-        <div class="hint">Pick 2–5 to focus the ideation (or leave blank and the coach will choose).</div>
-
-        <div class="checks" id="directions">
-          <!-- VP directions 1–7 -->
-          <label class="check"><input type="checkbox" value="1. Reduce customer overall costs"> <span><strong>1.</strong> Reduce customer overall costs</span></label>
-          <label class="check"><input type="checkbox" value="2. Reduce customer hassles"> <span><strong>2.</strong> Reduce customer hassles</span></label>
-          <label class="check"><input type="checkbox" value="3. Find non-customers"> <span><strong>3.</strong> Find non-customers</span></label>
-          <label class="check"><input type="checkbox" value="4. Add functionality or emotion"> <span><strong>4.</strong> Add functionality or emotion</span></label>
-          <label class="check"><input type="checkbox" value="5. Explore other segments or industries"> <span><strong>5.</strong> Explore other segments or industries</span></label>
-          <label class="check"><input type="checkbox" value="6. Introduce other stakeholders"> <span><strong>6.</strong> Introduce other stakeholders</span></label>
-          <label class="check"><input type="checkbox" value="7. Modify the revenue stream"> <span><strong>7.</strong> Modify the revenue stream</span></label>
-
-          <!-- VA directions 8–14 -->
-          <label class="check"><input type="checkbox" value="8. Introduce a technology"> <span><strong>8.</strong> Introduce a technology</span></label>
-          <label class="check"><input type="checkbox" value="9. Modify steps in the value chain"> <span><strong>9.</strong> Modify steps in the value chain</span></label>
-          <label class="check"><input type="checkbox" value="10. Eliminate or add steps"> <span><strong>10.</strong> Eliminate or add steps</span></label>
-          <label class="check"><input type="checkbox" value="11. Identify new inputs"> <span><strong>11.</strong> Identify new inputs</span></label>
-          <label class="check"><input type="checkbox" value="12. Associate with competitors/clients/suppliers"> <span><strong>12.</strong> Associate with competitors/clients/suppliers</span></label>
-          <label class="check"><input type="checkbox" value="13. Identify complementors"> <span><strong>13.</strong> Identify complementors</span></label>
-          <label class="check"><input type="checkbox" value="14. Leverage strategic resources"> <span><strong>14.</strong> Leverage strategic resources</span></label>
-        </div>
-      </section>
-    </div>
-
-    <section id="resultCard" class="card" style="display:none; margin-top:14px;">
-      <h3>New Business Model Output</h3>
-      <pre id="output"></pre>
-      <div class="hint" style="margin-top:10px;">Tip: iterate. Change one input (VP/VA/Profit or directions) and regenerate.</div>
+      <div id="errorIndustry" class="error"></div>
     </section>
 
+    <!-- Screen 2: Industry summary -->
+    <section class="card screen" id="screenSummary">
+      <h3>Step 2 — Current industry snapshot</h3>
+      <p class="hint">We’ll summarize the current players’ Value Proposition and Value Architecture (high level, no invented data).</p>
+      <pre id="summaryText"></pre>
+
+      <div class="actions">
+        <button id="btnSummaryContinue" type="button">Continue</button>
+        <button id="btnSummaryBack" class="ghost" type="button">Back</button>
+      </div>
+
+      <div id="errorSummary" class="error"></div>
+    </section>
+
+    <!-- Screen 3: Underserved value idea -->
+    <section class="card screen" id="screenIdea">
+      <h3>Step 3 — Your underserved value idea</h3>
+      <label for="ideaInput">List any idea you have to add value that is currently underserved within the market.</label>
+      <textarea id="ideaInput" placeholder="e.g., ‘reduce waiting time’, ‘more transparency’, ‘lower total ownership cost’, ‘better accessibility’…"></textarea>
+      <div class="hint">If you’re unsure, write what frustrates customers or what feels unfair/inefficient today.</div>
+
+      <div class="actions">
+        <button id="btnIdeaContinue" type="button">Start the 14 Directions</button>
+        <button id="btnIdeaBack" class="ghost" type="button">Back</button>
+      </div>
+
+      <div id="errorIdea" class="error"></div>
+    </section>
+
+    <!-- Screen 4: Directions (one at a time) -->
+    <section class="card screen" id="screenDirections">
+      <h3 id="directionTitle">Direction 1 of 14</h3>
+      <p class="small" id="directionSubtitle">Answer in 2–6 lines. You can skip.</p>
+
+      <label id="directionLabel" for="directionAnswer">Question</label>
+      <textarea id="directionAnswer" placeholder="Type your answer (or leave blank and click Skip)…"></textarea>
+      <div class="hint" id="directionHint"></div>
+
+      <div class="actions">
+        <button id="btnDirNext" type="button">Next</button>
+        <button id="btnDirSkip" class="secondary" type="button">Skip</button>
+        <button id="btnDirBack" class="ghost" type="button">Back</button>
+      </div>
+
+      <div id="errorDir" class="error"></div>
+    </section>
+
+    <!-- Screen 5: Final business model output -->
+    <section class="card screen" id="screenOutput">
+      <h3>Step 17 — Your new business model (Odyssey 3.14)</h3>
+      <pre id="finalOutput"></pre>
+
+      <div class="actions">
+        <button id="btnRestart" class="secondary" type="button">Restart</button>
+        <button id="btnOutputBack" class="ghost" type="button">Back</button>
+      </div>
+
+      <div id="errorOutput" class="error"></div>
+      <div class="hint" style="margin-top:10px;">Tip: copy/paste this into your assignment report.</div>
+    </section>
+
+    <!-- Debug -->
     <section id="debug" class="card" style="display:none; margin-top:14px;">
       <h3>Debug</h3>
       <pre id="debugText"></pre>
@@ -326,74 +341,50 @@
     /* ===== CONFIG ===== */
     const GEMINI_API_KEY = "AIzaSyDcOqoV01wcmFJPF8GYS1Y4CBCK9z8gOww"; // <-- paste your key here
 
-    /* ===== SYSTEM CONTEXT (your provided framework) ===== */
+    /* ===== SYSTEM CONTEXT (your framework) ===== */
     const SYSTEM_CONTEXT = `
 Role: You are an expert consultant and pedagogical guide in the Odyssey 3.14 business model innovation framework. Your goal is to help students invent new business models.
 
-The Framework: The Odyssey 3.14 approach analyzes a business model through three pillars plus an evaluation of contributions:
-1. Value Proposition (VP): Defines the offer.
-   - What? The product or service.
-   - To whom? The target customer segments.
-   - At what price? The pricing model.
-2. Value Architecture (VA): How the company generates and delivers the offer.
-   - Value Chain: The sequence of activities.
-   - Value Network: Key partners and stakeholders.
-   - Strategic Resources & Competencies: What the company owns and what it knows how to do.
-3. Profit Equation: The economic viability.
-   - Revenue: Sources of income.
-   - Costs: Cost structure.
-   - Capital Employed: Assets and working capital requirements.
+Framework pillars:
+1) Value Proposition (VP): What / To whom / At what price
+2) Value Architecture (VA): value chain, value network, strategic resources & competencies
+3) Profit Equation: revenues, costs, capital employed
 
-The Contributions: Evaluate the model on three dimensions:
-1. Financial: Revenue, costs, ROCE.
-2. Environmental: Impact on the planet (e.g., carbon footprint, circular economy).
-3. Societal: Impact on people (employability, quality of life, fair value sharing).
+Contributions to evaluate:
+- Financial
+- Environmental
+- Societal
 
-The Process: Help the user move from a "Reference Offer" to a "New Business Model" by exploring 14 Directions.
+Process: move from Reference Offer (current state) to New Business Model by exploring 14 Directions.
 
-The 14 Directions for Innovation:
-For Value Proposition:
-1. Reduce customer overall costs
-2. Reduce customer hassles
-3. Find non-customers
-4. Add more functionality or emotion
-5. Explore other segments or industries
-6. Introduce other stakeholders
-7. Modify the revenue stream
-For Value Architecture:
-8. Introduce a technology
-9. Modify steps in the value chain
-10. Eliminate or add steps
-11. Identify new inputs
-12. Associate with competitors, clients, or suppliers
-13. Identify complementors
-14. Leverage strategic resources
+14 Directions:
+1 Reduce customer overall costs
+2 Reduce customer hassles
+3 Find non-customers
+4 Add functionality or emotion
+5 Explore other segments or industries
+6 Introduce other stakeholders
+7 Modify the revenue stream
+8 Introduce a technology
+9 Modify steps in the value chain
+10 Eliminate or add steps
+11 Identify new inputs
+12 Associate with competitors/clients/suppliers
+13 Identify complementors
+14 Leverage strategic resources
     `.trim();
 
-    /* ===== CONSTANTS ===== */
+    /* ===== MODEL AUTO-DETECT (unchanged core) ===== */
     const BASE = "https://generativelanguage.googleapis.com/v1beta";
     let SELECTED_MODEL = null;
 
     const modelBadge = document.getElementById("modelBadge");
     const refreshModelsBtn = document.getElementById("refreshModelsBtn");
-    const generateBtn = document.getElementById("generateBtn");
-    const errorBox = document.getElementById("error");
-    const statusBox = document.getElementById("status");
-    const resultCard = document.getElementById("resultCard");
-    const outputEl = document.getElementById("output");
     const debug = document.getElementById("debug");
     const debugText = document.getElementById("debugText");
 
     function setModelBadge(html) {
       modelBadge.innerHTML = `<span class="dot"></span>${html}`;
-    }
-    function showError(msg) {
-      errorBox.textContent = msg || "";
-    }
-    function showStatus(msg) {
-      if (!msg) { statusBox.style.display = "none"; statusBox.textContent = ""; return; }
-      statusBox.style.display = "block";
-      statusBox.textContent = msg;
     }
     function showDebug(obj) {
       debug.style.display = "block";
@@ -426,14 +417,10 @@ For Value Architecture:
 
     async function detectModel() {
       hideDebug();
-      showError("");
-      showStatus("");
       setModelBadge("Model: (detecting…)");
 
       if (!GEMINI_API_KEY || GEMINI_API_KEY === "PUT_YOUR_KEY_HERE") {
         setModelBadge("Model: (missing API key)");
-        showError("Paste your Gemini API key into GEMINI_API_KEY first.");
-        SELECTED_MODEL = null;
         return;
       }
 
@@ -443,7 +430,6 @@ For Value Architecture:
 
       if (!res.ok) {
         setModelBadge("Model: (not available)");
-        showError(`Model list failed (${res.status}).`);
         showDebug(text);
         SELECTED_MODEL = null;
         return;
@@ -455,7 +441,6 @@ For Value Architecture:
       const best = pickBestModel(data.models || []);
       if (!best) {
         setModelBadge("Model: (none found)");
-        showError("No models with generateContent are available for this key.");
         showDebug(data);
         SELECTED_MODEL = null;
         return;
@@ -463,162 +448,378 @@ For Value Architecture:
 
       SELECTED_MODEL = best;
       setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong>`);
-      showStatus("Model detected. Ready.");
     }
 
-    function getSelectedDirections() {
-      const boxes = document.querySelectorAll('#directions input[type="checkbox"]');
-      const selected = [];
-      boxes.forEach(b => { if (b.checked) selected.push(b.value); });
-      return selected;
+    /* ===== WIZARD STATE ===== */
+    const state = {
+      industry: "",
+      industrySummary: "",
+      underservedIdea: "",
+      directions: Array.from({length: 14}, () => ""), // answers
+    };
+
+    const TOTAL_STEPS = 17; // 1 industry + 1 summary + 1 idea + 14 directions + 1 output
+    let currentStep = 1;    // 1..17
+    let directionIndex = 0; // 0..13
+
+    const stepBadge = document.getElementById("stepBadge");
+    const progressBar = document.getElementById("progressBar");
+    const subline = document.getElementById("subline");
+
+    function setStep(n) {
+      currentStep = n;
+      stepBadge.textContent = `Step ${currentStep}/${TOTAL_STEPS}`;
+      progressBar.style.width = `${Math.round(((currentStep - 1) / (TOTAL_STEPS - 1)) * 100)}%`;
     }
 
-    async function generate() {
-      hideDebug();
-      showError("");
-      showStatus("");
-      resultCard.style.display = "none";
-      outputEl.textContent = "";
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-      if (!SELECTED_MODEL) {
-        showError("No model selected yet. Click “Re-check model” first.");
-        return;
-      }
+    /* ===== DIRECTIONS (questions one at a time) ===== */
+    const DIRECTION_QS = [
+      { n: 1,  title: "Reduce customer overall costs", q: "How could you lower the customer’s total cost (price, ownership, time, switching) in this industry?", hint: "Think: cheaper, fewer steps, less waste, lower risk, fewer add-ons." },
+      { n: 2,  title: "Reduce customer hassles", q: "What are the biggest pain points/hassles today, and how could you remove them?", hint: "Think: paperwork, waiting, uncertainty, confusing choices, hidden fees." },
+      { n: 3,  title: "Find non-customers", q: "Who avoids or ignores this industry’s offers today—and why?", hint: "Name 1–2 groups and their reasons (price, trust, access, stigma, complexity)." },
+      { n: 4,  title: "Add functionality or emotion", q: "What could you add (features) or shift (emotional value) to make the offer more compelling?", hint: "Function: speed, quality, reliability. Emotion: status, belonging, safety, fun." },
+      { n: 5,  title: "Explore other segments or industries", q: "What idea from another industry could you borrow to improve this one?", hint: "Example patterns: subscriptions, self-service, marketplaces, loyalty, on-demand." },
+      { n: 6,  title: "Introduce other stakeholders", q: "Could you connect customers with other parties to create extra value (community, experts, insurers, employers, governments)?", hint: "Think: platforms, ecosystems, shared benefits, referrals." },
+      { n: 7,  title: "Modify the revenue stream", q: "How could you change pricing (subscription, usage-based, outcome-based, freemium, bundles)?", hint: "Be specific: who pays, when, and for what unit of value." },
+      { n: 8,  title: "Introduce a technology", q: "What technology could change the model (AI, IoT, automation, apps, blockchain, AR/VR)?", hint: "Name the tech and what it replaces or enables." },
+      { n: 9,  title: "Modify steps in the value chain", q: "Which step in the value chain could be redesigned for speed/quality/cost?", hint: "Pick one step (acquisition, delivery, service, returns, onboarding)." },
+      { n: 10, title: "Eliminate or add steps", q: "What step could you remove as useless—or add to create value?", hint: "Remove friction; add education, trust, verification, or personalization." },
+      { n: 11, title: "Identify new inputs", q: "What new inputs could be used (materials, data, knowledge, skills, local sourcing)?", hint: "Think circular economy, open data, community sourcing, partnerships." },
+      { n: 12, title: "Associate with competitors/clients/suppliers", q: "Could you partner with competitors, suppliers, or clients (co-opetition, vertical integration) to unlock value?", hint: "Name a plausible partner type and why they’d say yes." },
+      { n: 13, title: "Identify complementors", q: "What complements could you integrate (before/during/after the main use) to improve the experience?", hint: "Example: setup, financing, insurance, training, aftercare, resale." },
+      { n: 14, title: "Leverage strategic resources", q: "What underused asset/capability could be leveraged differently (brand, data, locations, community, expertise)?", hint: "Name the resource + the new use." },
+    ];
 
-      const vp = document.getElementById("vp").value.trim();
-      const va = document.getElementById("va").value.trim();
-      const pe = document.getElementById("pe").value.trim();
+    function renderDirection(i) {
+      directionIndex = i;
 
-      if (!vp || !va || !pe) {
-        showError("Please fill VP, VA, and Profit Equation (they can be short, but not empty).");
-        return;
-      }
+      const d = DIRECTION_QS[i];
+      document.getElementById("directionTitle").textContent = `Direction ${d.n} of 14 — ${d.title}`;
+      document.getElementById("directionLabel").textContent = d.q;
+      document.getElementById("directionHint").textContent = d.hint || "";
+      document.getElementById("directionAnswer").value = state.directions[i] || "";
 
-      const constraints = document.getElementById("constraints").value.trim();
-      const goals = document.getElementById("goals").value.trim();
-      const directions = getSelectedDirections();
+      // steps: 4..17 correspond to direction 1..14, then output
+      setStep(4 + i);
+      subline.textContent = "Answer each Direction (or Skip). After 14, we generate a full Odyssey 3.14 model.";
+    }
 
-      const userInput = `
-Reference Offer:
-- Value Proposition (VP):
-${vp}
-
-- Value Architecture (VA):
-${va}
-
-- Profit Equation:
-${pe}
-
-Constraints (optional):
-${constraints || "(none provided)"}
-
-Objectives (optional):
-${goals || "(none provided)"}
-
-Selected Innovation Directions:
-${directions.length ? directions.map(d => "- " + d).join("\n") : "(none selected — you choose the best 3–5 directions)"}
-      `.trim();
-
-      const instruction = `
-${SYSTEM_CONTEXT}
-
-Task:
-Help the student transform the Reference Offer into a New Business Model.
-
-Output format (use EXACT headings):
-A) Diagnosis of the Reference Offer (max 8 bullets)
-- 2–3 strengths and 4–6 weaknesses/gaps across VP/VA/Profit.
-
-B) New Business Model (one recommended concept)
-- VP: What / To whom / At what price
-- VA: value chain (key steps), value network (partners), strategic resources/competencies
-- Profit Equation: revenue streams, key costs, capital employed (what assets/working capital), and a quick viability note
-
-C) 14 Directions used
-- List the specific directions you used (at least 3). If the student selected directions, prioritize them.
-
-D) Contributions evaluation (Financial / Environmental / Societal)
-- Provide a small scorecard:
-  Financial: score 1–5 + 3 justification bullets
-  Environmental: score 1–5 + 3 justification bullets
-  Societal: score 1–5 + 3 justification bullets
-- Mention one key trade-off.
-
-E) Next experiments (5 items)
-- 5 concrete, low-cost tests the student should run next week.
-
-Constraints:
-- Be concrete, avoid generic advice.
-- Do NOT invent real data; if assumptions are needed, label them “Assumption: …”.
-- Keep total length under ~650 words.
-      `.trim();
-
-      const prompt = instruction + "\n\n=== STUDENT INPUT ===\n" + userInput;
-
-      generateBtn.disabled = true;
-      generateBtn.textContent = "Generating…";
+    /* ===== AI CALL (with retry on 503) ===== */
+    async function callGemini(promptText) {
+      if (!SELECTED_MODEL) throw new Error("No model selected. Click Re-check model.");
 
       const url = `${BASE}/${SELECTED_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
       let attempts = 0;
       const maxAttempts = 3;
 
       while (attempts < maxAttempts) {
-        try {
-          const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }]
-            })
-          });
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }]
+          })
+        });
 
-          const raw = await res.text();
+        const raw = await res.text();
 
-          if (res.ok) {
-            let data;
-            try { data = JSON.parse(raw); } catch { data = { raw }; }
-
-            const out =
-              data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("\n") ||
-              "No response text returned.";
-
-            outputEl.textContent = out;
-            resultCard.style.display = "block";
-            showStatus("Done. Iterate by changing one thing and regenerating.");
-            break;
-          }
-
-          if (res.status === 503) {
-            attempts++;
-            if (attempts >= maxAttempts) {
-              showError("The AI is busy right now (overloaded). Wait ~30–60 seconds and try again.");
-              showDebug(raw);
-              break;
-            }
-            showStatus("Model is busy — retrying…");
-            await new Promise(r => setTimeout(r, 1200 * attempts));
-            continue;
-          }
-
-          showError(`Gemini error ${res.status}`);
-          showDebug(raw);
-          break;
-
-        } catch (e) {
-          showError(String(e));
-          break;
+        if (res.ok) {
+          const data = JSON.parse(raw);
+          return data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("\n") || "";
         }
+
+        if (res.status === 503) {
+          attempts++;
+          if (attempts >= maxAttempts) {
+            throw new Error("The model is overloaded (503). Try again in 30–60 seconds.");
+          }
+          await new Promise(r => setTimeout(r, 1200 * attempts));
+          continue;
+        }
+
+        throw new Error(`Gemini error ${res.status}: ${raw}`);
       }
 
-      generateBtn.disabled = false;
-      generateBtn.textContent = "Generate New Business Model";
+      throw new Error("Unexpected error.");
     }
 
-    refreshModelsBtn.addEventListener("click", detectModel);
-    generateBtn.addEventListener("click", generate);
+    /* ===== SCREEN LOGIC ===== */
 
-    // Auto-detect on load
+    // Screen 1
+    const industryInput = document.getElementById("industryInput");
+    const btnIndustryNext = document.getElementById("btnIndustryNext");
+    const errorIndustry = document.getElementById("errorIndustry");
+
+    btnIndustryNext.addEventListener("click", async () => {
+      errorIndustry.textContent = "";
+      const industry = industryInput.value.trim();
+      if (!industry) {
+        errorIndustry.textContent = "Please enter an industry.";
+        return;
+      }
+      if (!SELECTED_MODEL) {
+        errorIndustry.textContent = "Model not ready. Click “Re-check model” and try again.";
+        return;
+      }
+
+      state.industry = industry;
+      setStep(2);
+      showScreen("screenSummary");
+      subline.textContent = "Generating a high-level snapshot of today’s industry players (VP + VA)…";
+
+      // generate summary
+      const prompt = `
+${SYSTEM_CONTEXT}
+
+Task:
+The student chose this industry: "${industry}".
+
+Write a HIGH-LEVEL snapshot of the main current players in this industry.
+Do NOT invent specific company financials. You may name typical player types (e.g., "large incumbents", "low-cost entrants", "premium niche brands") and if you mention example brands, label them as examples.
+
+Output format (use EXACT headings):
+1) Industry map (who plays)
+2) Typical Value Proposition (VP) today
+   - What
+   - To whom
+   - At what price (pricing patterns)
+3) Typical Value Architecture (VA) today
+   - Value chain (key steps)
+   - Value network (partners/stakeholders)
+   - Strategic resources & competencies
+4) Current unmet needs / tensions (5 bullets)
+
+Keep it under ~350 words. Concrete and structured.
+      `.trim();
+
+      const summaryTextEl = document.getElementById("summaryText");
+      const errorSummary = document.getElementById("errorSummary");
+      summaryTextEl.textContent = "Generating…";
+      errorSummary.textContent = "";
+
+      try {
+        const out = await callGemini(prompt);
+        state.industrySummary = out;
+        summaryTextEl.textContent = out || "(No output returned.)";
+        subline.textContent = "Read the snapshot, then continue.";
+      } catch (e) {
+        summaryTextEl.textContent = "";
+        errorSummary.textContent = String(e.message || e);
+        showDebug(String(e));
+      }
+    });
+
+    // Screen 2
+    const btnSummaryContinue = document.getElementById("btnSummaryContinue");
+    const btnSummaryBack = document.getElementById("btnSummaryBack");
+    btnSummaryContinue.addEventListener("click", () => {
+      setStep(3);
+      showScreen("screenIdea");
+      subline.textContent = "Now define the underserved value you want to create.";
+    });
+    btnSummaryBack.addEventListener("click", () => {
+      setStep(1);
+      showScreen("screenIndustry");
+      subline.textContent = "Start by choosing an industry. You can skip any Direction question.";
+    });
+
+    // Screen 3
+    const ideaInput = document.getElementById("ideaInput");
+    const btnIdeaContinue = document.getElementById("btnIdeaContinue");
+    const btnIdeaBack = document.getElementById("btnIdeaBack");
+    const errorIdea = document.getElementById("errorIdea");
+
+    btnIdeaContinue.addEventListener("click", () => {
+      errorIdea.textContent = "";
+      const idea = ideaInput.value.trim();
+      if (!idea) {
+        errorIdea.textContent = "Please write at least one underserved value idea (even a rough one).";
+        return;
+      }
+      state.underservedIdea = idea;
+      showScreen("screenDirections");
+      renderDirection(0);
+    });
+
+    btnIdeaBack.addEventListener("click", () => {
+      setStep(2);
+      showScreen("screenSummary");
+      subline.textContent = "Read the snapshot, then continue.";
+    });
+
+    // Screen 4 (Directions)
+    const directionAnswer = document.getElementById("directionAnswer");
+    const btnDirNext = document.getElementById("btnDirNext");
+    const btnDirSkip = document.getElementById("btnDirSkip");
+    const btnDirBack = document.getElementById("btnDirBack");
+    const errorDir = document.getElementById("errorDir");
+
+    function saveCurrentDirectionAnswer() {
+      state.directions[directionIndex] = directionAnswer.value.trim();
+    }
+
+    btnDirNext.addEventListener("click", () => {
+      errorDir.textContent = "";
+      saveCurrentDirectionAnswer();
+
+      if (directionIndex < 13) {
+        renderDirection(directionIndex + 1);
+        return;
+      }
+
+      // done with 14 directions → output
+      setStep(17);
+      showScreen("screenOutput");
+      subline.textContent = "Generating your new Odyssey 3.14 business model…";
+      generateFinalModel();
+    });
+
+    btnDirSkip.addEventListener("click", () => {
+      errorDir.textContent = "";
+      // keep current answer blank (or whatever typed); treat as pass if empty
+      saveCurrentDirectionAnswer();
+
+      if (directionIndex < 13) {
+        renderDirection(directionIndex + 1);
+      } else {
+        setStep(17);
+        showScreen("screenOutput");
+        subline.textContent = "Generating your new Odyssey 3.14 business model…";
+        generateFinalModel();
+      }
+    });
+
+    btnDirBack.addEventListener("click", () => {
+      errorDir.textContent = "";
+      saveCurrentDirectionAnswer();
+
+      if (directionIndex > 0) {
+        renderDirection(directionIndex - 1);
+      } else {
+        // go back to idea screen
+        setStep(3);
+        showScreen("screenIdea");
+        subline.textContent = "Now define the underserved value you want to create.";
+      }
+    });
+
+    // Screen 5 (Output)
+    const finalOutput = document.getElementById("finalOutput");
+    const errorOutput = document.getElementById("errorOutput");
+    const btnRestart = document.getElementById("btnRestart");
+    const btnOutputBack = document.getElementById("btnOutputBack");
+
+    btnRestart.addEventListener("click", () => {
+      // reset state
+      state.industry = "";
+      state.industrySummary = "";
+      state.underservedIdea = "";
+      state.directions = Array.from({length: 14}, () => "");
+      industryInput.value = "";
+      document.getElementById("summaryText").textContent = "";
+      ideaInput.value = "";
+      finalOutput.textContent = "";
+      errorOutput.textContent = "";
+      errorIndustry.textContent = "";
+      document.getElementById("errorSummary").textContent = "";
+      errorIdea.textContent = "";
+      errorDir.textContent = "";
+      hideDebug();
+
+      setStep(1);
+      subline.textContent = "Start by choosing an industry. You can skip any Direction question.";
+      showScreen("screenIndustry");
+    });
+
+    btnOutputBack.addEventListener("click", () => {
+      // return to last direction
+      showScreen("screenDirections");
+      renderDirection(13);
+    });
+
+    async function generateFinalModel() {
+      finalOutput.textContent = "Generating…";
+      errorOutput.textContent = "";
+      hideDebug();
+
+      // Build a compact view of answers
+      const answered = DIRECTION_QS.map((d, idx) => {
+        const a = (state.directions[idx] || "").trim();
+        return `Direction ${d.n} (${d.title}): ${a ? a : "(pass)"}`;
+      }).join("\n");
+
+      const prompt = `
+${SYSTEM_CONTEXT}
+
+Student project:
+Industry: ${state.industry}
+
+Industry snapshot (VP + VA of current players):
+${state.industrySummary}
+
+Student underserved value idea:
+${state.underservedIdea}
+
+Student answers to the 14 Directions:
+${answered}
+
+Task:
+Propose ONE coherent "New Business Model" that clearly builds on:
+- the industry snapshot,
+- the underserved value idea,
+- and the Direction answers (use any non-pass answers; if many are pass, you choose 3–5 strong directions).
+
+Output format (use EXACT headings):
+A) New Business Model (Odyssey 3.14)
+1) Value Proposition (VP)
+- What:
+- To whom:
+- At what price (pricing model):
+2) Value Architecture (VA)
+- Value chain (key steps):
+- Value network (key partners/stakeholders):
+- Strategic resources & competencies:
+3) Profit Equation
+- Revenue:
+- Costs:
+- Capital employed:
+
+B) Contributions evaluation
+- Financial (score 1–5 + 3 bullets)
+- Environmental (score 1–5 + 3 bullets)
+- Societal (score 1–5 + 3 bullets)
+- One key trade-off:
+
+C) 5 Next experiments
+- Five low-cost tests for next week.
+
+Constraints:
+- Be concrete; avoid generic advice.
+- Do NOT invent precise market numbers; label assumptions explicitly.
+- Keep under ~700 words.
+      `.trim();
+
+      try {
+        const out = await callGemini(prompt);
+        finalOutput.textContent = out || "(No output returned.)";
+        subline.textContent = "Done. You can go back and tweak answers, then regenerate.";
+      } catch (e) {
+        finalOutput.textContent = "";
+        errorOutput.textContent = String(e.message || e);
+        showDebug(String(e));
+      }
+    }
+
+    /* ===== INIT ===== */
+    refreshModelsBtn.addEventListener("click", detectModel);
     detectModel();
+    setStep(1);
   </script>
 </body>
 </html>
