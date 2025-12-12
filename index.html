@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Odyssey 3.14 AI Tutor</title>
+  <title>Odyssey 3.14 Business Model Coach</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Epic/classic fonts -->
@@ -20,9 +20,9 @@
       --accent:#2563eb;
       --accent2:#1d4ed8;
       --danger:#b91c1c;
+      --ok:#065f46;
     }
 
-    /* Odyssey-themed background */
     body{
       margin:0;
       min-height:100vh;
@@ -41,25 +41,22 @@
       content:"";
       position:fixed;
       inset:0;
-      /* Public-domain-style Odyssey illustration via Wikimedia */
       background-image: url("https://upload.wikimedia.org/wikipedia/commons/8/89/OdysseySuitors.png");
       background-size: cover;
       background-position: center;
-      opacity: 0.12;
+      opacity: 0.10;
       filter: blur(0.6px);
       pointer-events:none;
       z-index:-1;
     }
 
     .container{
-      max-width: 980px;
+      max-width: 1060px;
       width:100%;
       padding: 28px 18px 44px;
     }
 
-    header{
-      margin-bottom: 14px;
-    }
+    header{ margin-bottom: 14px; }
 
     h1{
       font-family: "Cinzel", ui-serif, serif;
@@ -82,14 +79,40 @@
       margin: 0;
     }
 
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+      margin-top: 12px;
+    }
+    @media (min-width: 960px){
+      .grid{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .card{
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: var(--paper-strong);
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(17,24,39,0.10);
+    }
+
+    .card h3{
+      margin: 0 0 10px 0;
+      font-family: "Cinzel", ui-serif, serif;
+      letter-spacing: 0.01em;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
     label{
       display:block;
-      margin-top: 14px;
+      margin-top: 12px;
       margin-bottom: 6px;
       font-weight: 800;
     }
 
-    select, textarea{
+    input[type="text"], textarea{
       width:100%;
       box-sizing:border-box;
       padding: 12px 12px;
@@ -98,14 +121,15 @@
       background: var(--paper);
       outline:none;
       transition: box-shadow .15s ease, border-color .15s ease;
+      font-family: inherit;
+      font-size: 16px;
     }
+    textarea{ min-height: 120px; resize: vertical; }
 
-    select:focus, textarea:focus{
+    input:focus, textarea:focus{
       border-color: rgba(37,99,235,0.55);
       box-shadow: 0 0 0 4px rgba(37,99,235,0.14);
     }
-
-    textarea{ min-height: 170px; resize: vertical; }
 
     .row{
       display:flex;
@@ -136,6 +160,14 @@
       box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
     }
 
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+      align-items:center;
+    }
+
     button{
       padding: 11px 18px;
       border-radius: 999px;
@@ -147,17 +179,9 @@
       box-shadow: 0 10px 30px rgba(17,24,39,0.12);
       transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
     }
-
     button:hover{ transform: translateY(-1px); filter: brightness(1.02); }
     button:active{ transform: translateY(0px); }
     button:disabled{ opacity:0.6; cursor:default; box-shadow:none; }
-
-    .primary-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 14px;
-    }
 
     .secondary{
       background: rgba(255,255,255,0.55);
@@ -167,33 +191,42 @@
       font-weight: 800;
     }
 
-    .secondary:hover{
-      filter: none;
-      transform: translateY(-1px);
-      box-shadow: 0 8px 22px rgba(17,24,39,0.08);
-    }
-
     .error{
       color: var(--danger);
       margin-top: 10px;
-      font-weight: 700;
+      font-weight: 800;
       white-space: pre-wrap;
     }
 
-    .card{
-      margin-top: 18px;
-      padding: 16px 18px;
-      border-radius: 18px;
-      background: var(--paper-strong);
-      border: 1px solid var(--border);
-      box-shadow: 0 16px 40px rgba(17,24,39,0.10);
+    .ok{
+      color: var(--ok);
+      margin-top: 10px;
+      font-weight: 800;
     }
 
-    .card h3{
-      margin: 0 0 10px 0;
-      font-family: "Cinzel", ui-serif, serif;
-      letter-spacing: 0.01em;
-      font-weight: 800;
+    .checks{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+      margin-top: 10px;
+    }
+    @media (min-width: 960px){
+      .checks{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .check{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background: var(--paper);
+    }
+
+    .check input{
+      margin-top: 3px;
+      transform: scale(1.1);
     }
 
     pre{
@@ -201,13 +234,13 @@
       word-wrap: break-word;
       margin:0;
       font-size: 16px;
-      line-height: 1.35;
+      line-height: 1.4;
     }
 
-    .footer-note{
-      margin-top: 12px;
+    .hint{
       color: var(--muted);
       font-size: 13px;
+      margin-top: 6px;
     }
   </style>
 </head>
@@ -215,71 +248,152 @@
 <body>
   <div class="container">
     <header>
-      <h1>Odyssey 3.14 AI Tutor</h1>
-      <h2>Write a step. Get feedback. Iterate like a hero.</h2>
-      <p class="small">This page auto-detects the best Gemini model your API key can use (no more model-name guessing).</p>
-
+      <h1>Odyssey 3.14 Business Model Coach</h1>
+      <h2>From “Reference Offer” → “New Business Model” using the 14 Directions + Contributions evaluation.</h2>
+      <p class="small">This page auto-detects the best Gemini model your API key can use.</p>
       <div class="row">
         <span class="badge" id="modelBadge"><span class="dot"></span>Model: (detecting…)</span>
       </div>
     </header>
 
-    <main>
-      <label for="step">Which Odyssey 3.14 step?</label>
-      <select id="step">
-        <option>Vision</option>
-        <option>Business arena</option>
-        <option>Value proposition</option>
-        <option>Resources & capabilities</option>
-        <option>Key activities</option>
-        <option>Revenue model</option>
-        <option>Cost structure</option>
-        <option>Differentiation</option>
-        <option>Innovation levers</option>
-      </select>
+    <div class="grid">
+      <section class="card">
+        <h3>Reference Offer</h3>
 
-      <label for="draft">Your draft</label>
-      <textarea id="draft" placeholder="Write your draft here… (5–10 lines is enough)"></textarea>
+        <label for="vp">1) Value Proposition (What / To whom / At what price)</label>
+        <textarea id="vp" placeholder="Describe the current offer, target customers, and pricing..."></textarea>
 
-      <div class="primary-actions">
-        <button id="btn" type="button">Get feedback</button>
-        <button id="refreshModelsBtn" class="secondary" type="button">Re-check model</button>
-      </div>
+        <label for="va">2) Value Architecture (Value chain / network / strategic resources)</label>
+        <textarea id="va" placeholder="How it is produced and delivered; key partners; capabilities..."></textarea>
 
-      <div id="error" class="error"></div>
+        <label for="pe">3) Profit Equation (Revenue / Costs / Capital employed)</label>
+        <textarea id="pe" placeholder="Where money comes from, major costs, assets/working capital needed..."></textarea>
 
-      <section id="card" class="card" style="display:none;">
-        <h3>AI feedback</h3>
-        <pre id="output"></pre>
-        <p class="footer-note">Use this as coaching, not as an “answer key.” Always apply your own judgment.</p>
+        <label for="constraints">Constraints (optional)</label>
+        <textarea id="constraints" placeholder="What must NOT change? (budget, regulation, brand, geography, timing...)"></textarea>
+
+        <label for="goals">Objectives (optional)</label>
+        <textarea id="goals" placeholder="What do you want to improve? (profit, CO2 reduction, access, employability...)"></textarea>
+
+        <div class="actions">
+          <button id="generateBtn" type="button">Generate New Business Model</button>
+          <button id="refreshModelsBtn" class="secondary" type="button">Re-check model</button>
+        </div>
+
+        <div id="status" class="ok" style="display:none;"></div>
+        <div id="error" class="error"></div>
       </section>
 
-      <section id="debug" class="card" style="display:none;">
-        <h3>Debug</h3>
-        <pre id="debugText"></pre>
+      <section class="card">
+        <h3>Choose Innovation Directions</h3>
+        <div class="hint">Pick 2–5 to focus the ideation (or leave blank and the coach will choose).</div>
+
+        <div class="checks" id="directions">
+          <!-- VP directions 1–7 -->
+          <label class="check"><input type="checkbox" value="1. Reduce customer overall costs"> <span><strong>1.</strong> Reduce customer overall costs</span></label>
+          <label class="check"><input type="checkbox" value="2. Reduce customer hassles"> <span><strong>2.</strong> Reduce customer hassles</span></label>
+          <label class="check"><input type="checkbox" value="3. Find non-customers"> <span><strong>3.</strong> Find non-customers</span></label>
+          <label class="check"><input type="checkbox" value="4. Add functionality or emotion"> <span><strong>4.</strong> Add functionality or emotion</span></label>
+          <label class="check"><input type="checkbox" value="5. Explore other segments or industries"> <span><strong>5.</strong> Explore other segments or industries</span></label>
+          <label class="check"><input type="checkbox" value="6. Introduce other stakeholders"> <span><strong>6.</strong> Introduce other stakeholders</span></label>
+          <label class="check"><input type="checkbox" value="7. Modify the revenue stream"> <span><strong>7.</strong> Modify the revenue stream</span></label>
+
+          <!-- VA directions 8–14 -->
+          <label class="check"><input type="checkbox" value="8. Introduce a technology"> <span><strong>8.</strong> Introduce a technology</span></label>
+          <label class="check"><input type="checkbox" value="9. Modify steps in the value chain"> <span><strong>9.</strong> Modify steps in the value chain</span></label>
+          <label class="check"><input type="checkbox" value="10. Eliminate or add steps"> <span><strong>10.</strong> Eliminate or add steps</span></label>
+          <label class="check"><input type="checkbox" value="11. Identify new inputs"> <span><strong>11.</strong> Identify new inputs</span></label>
+          <label class="check"><input type="checkbox" value="12. Associate with competitors/clients/suppliers"> <span><strong>12.</strong> Associate with competitors/clients/suppliers</span></label>
+          <label class="check"><input type="checkbox" value="13. Identify complementors"> <span><strong>13.</strong> Identify complementors</span></label>
+          <label class="check"><input type="checkbox" value="14. Leverage strategic resources"> <span><strong>14.</strong> Leverage strategic resources</span></label>
+        </div>
       </section>
-    </main>
+    </div>
+
+    <section id="resultCard" class="card" style="display:none; margin-top:14px;">
+      <h3>New Business Model Output</h3>
+      <pre id="output"></pre>
+      <div class="hint" style="margin-top:10px;">Tip: iterate. Change one input (VP/VA/Profit or directions) and regenerate.</div>
+    </section>
+
+    <section id="debug" class="card" style="display:none; margin-top:14px;">
+      <h3>Debug</h3>
+      <pre id="debugText"></pre>
+    </section>
   </div>
 
   <script>
     /* ===== CONFIG ===== */
     const GEMINI_API_KEY = "AIzaSyDcOqoV01wcmFJPF8GYS1Y4CBCK9z8gOww"; // <-- paste your key here
 
+    /* ===== SYSTEM CONTEXT (your provided framework) ===== */
+    const SYSTEM_CONTEXT = `
+Role: You are an expert consultant and pedagogical guide in the Odyssey 3.14 business model innovation framework. Your goal is to help students invent new business models.
+
+The Framework: The Odyssey 3.14 approach analyzes a business model through three pillars plus an evaluation of contributions:
+1. Value Proposition (VP): Defines the offer.
+   - What? The product or service.
+   - To whom? The target customer segments.
+   - At what price? The pricing model.
+2. Value Architecture (VA): How the company generates and delivers the offer.
+   - Value Chain: The sequence of activities.
+   - Value Network: Key partners and stakeholders.
+   - Strategic Resources & Competencies: What the company owns and what it knows how to do.
+3. Profit Equation: The economic viability.
+   - Revenue: Sources of income.
+   - Costs: Cost structure.
+   - Capital Employed: Assets and working capital requirements.
+
+The Contributions: Evaluate the model on three dimensions:
+1. Financial: Revenue, costs, ROCE.
+2. Environmental: Impact on the planet (e.g., carbon footprint, circular economy).
+3. Societal: Impact on people (employability, quality of life, fair value sharing).
+
+The Process: Help the user move from a "Reference Offer" to a "New Business Model" by exploring 14 Directions.
+
+The 14 Directions for Innovation:
+For Value Proposition:
+1. Reduce customer overall costs
+2. Reduce customer hassles
+3. Find non-customers
+4. Add more functionality or emotion
+5. Explore other segments or industries
+6. Introduce other stakeholders
+7. Modify the revenue stream
+For Value Architecture:
+8. Introduce a technology
+9. Modify steps in the value chain
+10. Eliminate or add steps
+11. Identify new inputs
+12. Associate with competitors, clients, or suppliers
+13. Identify complementors
+14. Leverage strategic resources
+    `.trim();
+
     /* ===== CONSTANTS ===== */
     const BASE = "https://generativelanguage.googleapis.com/v1beta";
     let SELECTED_MODEL = null;
 
-    const btn = document.getElementById("btn");
-    const refreshModelsBtn = document.getElementById("refreshModelsBtn");
-    const error = document.getElementById("error");
-    const card = document.getElementById("card");
-    const output = document.getElementById("output");
     const modelBadge = document.getElementById("modelBadge");
+    const refreshModelsBtn = document.getElementById("refreshModelsBtn");
+    const generateBtn = document.getElementById("generateBtn");
+    const errorBox = document.getElementById("error");
+    const statusBox = document.getElementById("status");
+    const resultCard = document.getElementById("resultCard");
+    const outputEl = document.getElementById("output");
     const debug = document.getElementById("debug");
     const debugText = document.getElementById("debugText");
 
+    function setModelBadge(html) {
+      modelBadge.innerHTML = `<span class="dot"></span>${html}`;
+    }
     function showError(msg) {
-      error.textContent = msg || "";
+      errorBox.textContent = msg || "";
+    }
+    function showStatus(msg) {
+      if (!msg) { statusBox.style.display = "none"; statusBox.textContent = ""; return; }
+      statusBox.style.display = "block";
+      statusBox.textContent = msg;
     }
     function showDebug(obj) {
       debug.style.display = "block";
@@ -289,11 +403,7 @@
       debug.style.display = "none";
       debugText.textContent = "";
     }
-    function setModelBadge(text) {
-      modelBadge.innerHTML = `<span class="dot"></span>${text}`;
-    }
 
-    // Pick the best model from ListModels results (must support generateContent)
     function pickBestModel(models) {
       const usable = (models || []).filter(m =>
         Array.isArray(m.supportedGenerationMethods) &&
@@ -317,6 +427,7 @@
     async function detectModel() {
       hideDebug();
       showError("");
+      showStatus("");
       setModelBadge("Model: (detecting…)");
 
       if (!GEMINI_API_KEY || GEMINI_API_KEY === "PUT_YOUR_KEY_HERE") {
@@ -352,78 +463,159 @@
 
       SELECTED_MODEL = best;
       setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong>`);
+      showStatus("Model detected. Ready.");
     }
 
-    async function generateFeedback() {
-      showError("");
+    function getSelectedDirections() {
+      const boxes = document.querySelectorAll('#directions input[type="checkbox"]');
+      const selected = [];
+      boxes.forEach(b => { if (b.checked) selected.push(b.value); });
+      return selected;
+    }
+
+    async function generate() {
       hideDebug();
-      card.style.display = "none";
+      showError("");
+      showStatus("");
+      resultCard.style.display = "none";
+      outputEl.textContent = "";
 
       if (!SELECTED_MODEL) {
         showError("No model selected yet. Click “Re-check model” first.");
         return;
       }
 
-      const step = document.getElementById("step").value;
-      const draft = document.getElementById("draft").value.trim();
-      if (!draft) {
-        showError("Write something first.");
+      const vp = document.getElementById("vp").value.trim();
+      const va = document.getElementById("va").value.trim();
+      const pe = document.getElementById("pe").value.trim();
+
+      if (!vp || !va || !pe) {
+        showError("Please fill VP, VA, and Profit Equation (they can be short, but not empty).");
         return;
       }
 
-      const prompt = `
-You are an AI tutor helping students apply the Odyssey 3.14 business model innovation approach.
+      const constraints = document.getElementById("constraints").value.trim();
+      const goals = document.getElementById("goals").value.trim();
+      const directions = getSelectedDirections();
 
-Step: ${step}
-Student draft:
-${draft}
+      const userInput = `
+Reference Offer:
+- Value Proposition (VP):
+${vp}
 
-Respond with:
-1) Quick evaluation (3–4 sentences)
-2) Suggestions (3–5 numbered, specific actions)
-3) Checklist (4–6 bullets starting with [ ] or [x])
-Keep it under ~300 words.
+- Value Architecture (VA):
+${va}
+
+- Profit Equation:
+${pe}
+
+Constraints (optional):
+${constraints || "(none provided)"}
+
+Objectives (optional):
+${goals || "(none provided)"}
+
+Selected Innovation Directions:
+${directions.length ? directions.map(d => "- " + d).join("\n") : "(none selected — you choose the best 3–5 directions)"}
       `.trim();
 
-      btn.disabled = true;
-      btn.textContent = "Getting feedback…";
+      const instruction = `
+${SYSTEM_CONTEXT}
 
-      try {
-        const url = `${BASE}/${SELECTED_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-          })
-        });
+Task:
+Help the student transform the Reference Offer into a New Business Model.
 
-        const raw = await res.text();
-        if (!res.ok) {
+Output format (use EXACT headings):
+A) Diagnosis of the Reference Offer (max 8 bullets)
+- 2–3 strengths and 4–6 weaknesses/gaps across VP/VA/Profit.
+
+B) New Business Model (one recommended concept)
+- VP: What / To whom / At what price
+- VA: value chain (key steps), value network (partners), strategic resources/competencies
+- Profit Equation: revenue streams, key costs, capital employed (what assets/working capital), and a quick viability note
+
+C) 14 Directions used
+- List the specific directions you used (at least 3). If the student selected directions, prioritize them.
+
+D) Contributions evaluation (Financial / Environmental / Societal)
+- Provide a small scorecard:
+  Financial: score 1–5 + 3 justification bullets
+  Environmental: score 1–5 + 3 justification bullets
+  Societal: score 1–5 + 3 justification bullets
+- Mention one key trade-off.
+
+E) Next experiments (5 items)
+- 5 concrete, low-cost tests the student should run next week.
+
+Constraints:
+- Be concrete, avoid generic advice.
+- Do NOT invent real data; if assumptions are needed, label them “Assumption: …”.
+- Keep total length under ~650 words.
+      `.trim();
+
+      const prompt = instruction + "\n\n=== STUDENT INPUT ===\n" + userInput;
+
+      generateBtn.disabled = true;
+      generateBtn.textContent = "Generating…";
+
+      const url = `${BASE}/${SELECTED_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+      let attempts = 0;
+      const maxAttempts = 3;
+
+      while (attempts < maxAttempts) {
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
+          });
+
+          const raw = await res.text();
+
+          if (res.ok) {
+            let data;
+            try { data = JSON.parse(raw); } catch { data = { raw }; }
+
+            const out =
+              data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("\n") ||
+              "No response text returned.";
+
+            outputEl.textContent = out;
+            resultCard.style.display = "block";
+            showStatus("Done. Iterate by changing one thing and regenerating.");
+            break;
+          }
+
+          if (res.status === 503) {
+            attempts++;
+            if (attempts >= maxAttempts) {
+              showError("The AI is busy right now (overloaded). Wait ~30–60 seconds and try again.");
+              showDebug(raw);
+              break;
+            }
+            showStatus("Model is busy — retrying…");
+            await new Promise(r => setTimeout(r, 1200 * attempts));
+            continue;
+          }
+
           showError(`Gemini error ${res.status}`);
           showDebug(raw);
-          return;
+          break;
+
+        } catch (e) {
+          showError(String(e));
+          break;
         }
-
-        let data;
-        try { data = JSON.parse(raw); } catch { data = { raw }; }
-
-        const out =
-          data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("\n") ||
-          "No response text returned.";
-
-        output.textContent = out;
-        card.style.display = "block";
-      } catch (e) {
-        showError(String(e));
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Get feedback";
       }
+
+      generateBtn.disabled = false;
+      generateBtn.textContent = "Generate New Business Model";
     }
 
     refreshModelsBtn.addEventListener("click", detectModel);
-    btn.addEventListener("click", generateFeedback);
+    generateBtn.addEventListener("click", generate);
 
     // Auto-detect on load
     detectModel();
