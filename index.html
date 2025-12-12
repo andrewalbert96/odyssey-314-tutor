@@ -14,9 +14,6 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 
-  <!-- Optional: DOCX -> text in-browser (kept so user can override built-in knowledge) -->
-  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
-
   <style>
     :root{
       --ink:#111827;
@@ -302,31 +299,6 @@
       background: rgba(255,255,255,0.65);
       border-top: 1px solid rgba(17,24,39,0.08);
     }
-
-    .pill{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(17,24,39,0.12);
-      background: rgba(255,255,255,0.60);
-      color:#374151;
-      font-size: 13px;
-      font-weight: 800;
-    }
-    .kstatus{
-      margin-top:10px;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .tiny{
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
   </style>
 </head>
 
@@ -355,13 +327,7 @@
       <input id="industryInput" type="text" placeholder="e.g., ski bindings, fast fashion, coffee shops, private tutoring…" />
       <div class="hint">Be specific if you can (e.g., “budget airlines in Europe” instead of “airlines”).</div>
 
-      <label for="knowledgeFile" style="margin-top:14px;">Optional: Upload an updated Odyssey 3.14 “Knowledge Pack” (DOCX or TXT)</label>
-      <input id="knowledgeFile" type="file" accept=".docx,.txt" />
-      <div class="tiny">Built-in knowledge is already loaded. Uploading a file will override it for this session.</div>
-      <div class="kstatus">
-        <span class="pill" id="kBadge">Knowledge: loading…</span>
-        <button id="btnClearKnowledge" class="ghost" type="button">Reset to Built-in</button>
-      </div>
+      <!-- ✅ Knowledge upload UI REMOVED -->
 
       <div class="actions">
         <button id="btnIndustryNext" type="button">Continue</button>
@@ -737,54 +703,6 @@ A complete Odyssey 3.14 output includes:
       }
     }
 
-    /* ===== "Knowledge Pack" (DOCX/TXT) loader (optional override) ===== */
-    const knowledgeFile = document.getElementById("knowledgeFile");
-    const kBadge = document.getElementById("kBadge");
-    const btnClearKnowledge = document.getElementById("btnClearKnowledge");
-
-    async function loadKnowledgeFromFile(file) {
-      if (!file) return "";
-      const name = (file.name || "").toLowerCase();
-      if (name.endsWith(".txt")) return await file.text();
-      if (name.endsWith(".docx")) {
-        const ab = await file.arrayBuffer();
-        const result = await window.mammoth.extractRawText({ arrayBuffer: ab });
-        return (result?.value || "").trim();
-      }
-      throw new Error("Unsupported file type. Please upload .docx or .txt");
-    }
-
-    function setKnowledgeStatus(text) {
-      const has = !!(text && text.trim().length);
-      if (!has) {
-        kBadge.textContent = "Knowledge: none";
-        return;
-      }
-      const chars = text.trim().length;
-      const label = (text === ODYSSEY_KNOWLEDGE_HARDCODED)
-        ? `Knowledge: built-in (${chars.toLocaleString()} chars)`
-        : `Knowledge: override (${chars.toLocaleString()} chars)`;
-      kBadge.textContent = label;
-    }
-
-    knowledgeFile.addEventListener("change", async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      try {
-        const txt = await loadKnowledgeFromFile(file);
-        state.odysseyKnowledge = txt;
-        setKnowledgeStatus(txt);
-      } catch (err) {
-        alert(String(err?.message || err));
-      }
-    });
-
-    btnClearKnowledge.addEventListener("click", () => {
-      knowledgeFile.value = "";
-      state.odysseyKnowledge = ODYSSEY_KNOWLEDGE_HARDCODED;
-      setKnowledgeStatus(state.odysseyKnowledge);
-    });
-
     /* ===== SYSTEM CONTEXT ===== */
     const SYSTEM_CONTEXT = `
 Role: You are an expert consultant and pedagogical guide in the Odyssey 3.14 business model innovation framework.
@@ -899,7 +817,7 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       directions: Array.from({length: 14}, () => ""),
       finalModelText: "",
       finalImgUrl: "",
-      // ✅ Built-in knowledge loaded automatically
+      // ✅ Built-in knowledge loaded automatically (no upload/override path)
       odysseyKnowledge: ODYSSEY_KNOWLEDGE_HARDCODED
     };
 
@@ -1056,10 +974,7 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
 
       state.industry = industry;
 
-      // Change Odyssey background on every submit
       applyRandomTheme();
-
-      // Set a fun industry-relevant image on both Summary + Final screens
       setIndustryImageEverywhere(industry);
 
       setStep(2);
@@ -1212,7 +1127,6 @@ Keep it under ~350 words.
       state.directions = Array.from({length: 14}, () => "");
       state.finalModelText = "";
       state.finalImgUrl = "";
-      // keep knowledge (built-in or override) as-is
 
       industryInput.value = "";
       ideaInput.value = "";
@@ -1372,9 +1286,6 @@ Constraints:
 
     summaryImg.src = prettyLoadingSvgDataUri("Industry", "Enter an industry to load an image…");
     finalImg.src = prettyLoadingSvgDataUri("Business model", "Enter an industry to load an image…");
-
-    // show built-in knowledge status immediately
-    setKnowledgeStatus(state.odysseyKnowledge);
   </script>
 </body>
 </html>
