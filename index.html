@@ -10,6 +10,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Crimson+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <!-- Markdown -> HTML + sanitization -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+
   <style>
     :root{
       --ink:#111827;
@@ -218,14 +222,6 @@
       font-weight: 800;
     }
 
-    pre{
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      margin:0;
-      font-size: 16px;
-      line-height: 1.45;
-    }
-
     .hint{
       color: var(--muted);
       font-size: 13px;
@@ -234,6 +230,78 @@
 
     .screen{ display:none; }
     .screen.active{ display:block; }
+
+    /* ===== Vibrant AI Output Styling ===== */
+    .ai{
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(17,24,39,0.10);
+      border-radius: 16px;
+      padding: 14px 14px;
+    }
+    .ai h1,.ai h2,.ai h3{
+      font-family:"Cinzel",serif;
+      margin:14px 0 8px;
+      letter-spacing: 0.01em;
+    }
+    .ai h1{ font-size: 22px; }
+    .ai h2{ font-size: 18px; }
+    .ai h3{ font-size: 16px; }
+    .ai p{ margin:8px 0; }
+    .ai ul, .ai ol{ margin:8px 0 8px 22px; }
+    .ai li{ margin:6px 0; }
+    .ai strong{ color:#0f172a; }
+    .ai code{
+      background:rgba(17,24,39,.06);
+      padding:2px 6px;
+      border-radius:8px;
+    }
+    .ai blockquote{
+      margin:10px 0;
+      padding:10px 12px;
+      border-left:4px solid rgba(37,99,235,.55);
+      background:rgba(255,255,255,.65);
+      border-radius:12px;
+    }
+    .ai table{
+      width:100%;
+      border-collapse: collapse;
+      margin:10px 0;
+      overflow:hidden;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,0.12);
+      background: rgba(255,255,255,0.6);
+    }
+    .ai th, .ai td{
+      text-align:left;
+      padding:10px 10px;
+      border-bottom: 1px solid rgba(17,24,39,0.08);
+      vertical-align: top;
+    }
+    .ai th{
+      background: rgba(37,99,235,0.08);
+      font-weight: 800;
+    }
+
+    /* ===== Image block ===== */
+    .imgWrap{
+      margin-top: 12px;
+      border-radius: 18px;
+      overflow:hidden;
+      border: 1px solid rgba(17,24,39,0.12);
+      background: rgba(255,255,255,0.55);
+    }
+    .imgWrap img{
+      display:block;
+      width:100%;
+      height:auto;
+    }
+    .imgCap{
+      padding:10px 12px;
+      font-size: 13px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.65);
+      border-top: 1px solid rgba(17,24,39,0.08);
+    }
   </style>
 </head>
 
@@ -273,7 +341,18 @@
     <section class="card screen" id="screenSummary">
       <h3>Step 2 — Current industry snapshot</h3>
       <p class="hint">We’ll summarize the current players’ Value Proposition and Value Architecture (high level, no invented data).</p>
-      <pre id="summaryText"></pre>
+
+      <!-- Styled AI output -->
+      <div id="summaryText" class="ai"></div>
+
+      <!-- Optional image -->
+      <div class="actions" style="margin-top:12px;">
+        <button id="btnSummaryImage" class="secondary" type="button">Generate an industry visual</button>
+      </div>
+      <div id="summaryImgBlock" class="imgWrap" style="display:none;">
+        <img id="summaryImg" alt="Industry visual" />
+        <div class="imgCap" id="summaryImgCap"></div>
+      </div>
 
       <div class="actions">
         <button id="btnSummaryContinue" type="button">Continue</button>
@@ -319,7 +398,18 @@
     <!-- Screen 5: Final business model output -->
     <section class="card screen" id="screenOutput">
       <h3>Step 17 — Your new business model (Odyssey 3.14)</h3>
-      <pre id="finalOutput"></pre>
+
+      <!-- Styled AI output -->
+      <div id="finalOutput" class="ai"></div>
+
+      <!-- Optional concept image -->
+      <div class="actions" style="margin-top:12px;">
+        <button id="btnFinalImage" class="secondary" type="button">Generate a concept visual</button>
+      </div>
+      <div id="finalImgBlock" class="imgWrap" style="display:none;">
+        <img id="finalImg" alt="Concept visual" />
+        <div class="imgCap" id="finalImgCap"></div>
+      </div>
 
       <div class="actions">
         <button id="btnRestart" class="secondary" type="button">Restart</button>
@@ -339,7 +429,7 @@
 
   <script>
     /* ===== CONFIG ===== */
-    const GEMINI_API_KEY = "AIzaSyDAesLJDXy6g1NSz-YTIOp2LRRpavLs9Es"; // <-- paste your key here
+    const GEMINI_API_KEY = "PUT_YOUR_KEY_HERE"; // <-- paste your key here
 
     /* ===== SYSTEM CONTEXT (your framework) ===== */
     const SYSTEM_CONTEXT = `
@@ -374,9 +464,10 @@ Process: move from Reference Offer (current state) to New Business Model by expl
 14 Leverage strategic resources
     `.trim();
 
-    /* ===== MODEL AUTO-DETECT (unchanged core) ===== */
+    /* ===== MODEL AUTO-DETECT ===== */
     const BASE = "https://generativelanguage.googleapis.com/v1beta";
     let SELECTED_MODEL = null;
+    let IMAGE_MODEL = null; // best available image-capable model, if present
 
     const modelBadge = document.getElementById("modelBadge");
     const refreshModelsBtn = document.getElementById("refreshModelsBtn");
@@ -395,7 +486,7 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       debugText.textContent = "";
     }
 
-    function pickBestModel(models) {
+    function pickBestTextModel(models) {
       const usable = (models || []).filter(m =>
         Array.isArray(m.supportedGenerationMethods) &&
         m.supportedGenerationMethods.includes("generateContent") &&
@@ -411,6 +502,28 @@ Process: move from Reference Offer (current state) to New Business Model by expl
         return 200;
       };
 
+      usable.sort((a, b) => score(b.name) - score(a.name));
+      return usable[0].name;
+    }
+
+    function pickBestImageModel(models) {
+      // Heuristic: look for names containing "image" and generateContent support.
+      // If your key has an image model, it will appear here.
+      const usable = (models || []).filter(m =>
+        Array.isArray(m.supportedGenerationMethods) &&
+        m.supportedGenerationMethods.includes("generateContent") &&
+        typeof m.name === "string" &&
+        m.name.toLowerCase().includes("image")
+      );
+      if (usable.length === 0) return null;
+
+      // Prefer "2.5" + "flash" if present
+      const score = (name) => {
+        const n = name.toLowerCase();
+        if (n.includes("2.5") && n.includes("flash")) return 500;
+        if (n.includes("flash")) return 400;
+        return 200;
+      };
       usable.sort((a, b) => score(b.name) - score(a.name));
       return usable[0].name;
     }
@@ -432,22 +545,23 @@ Process: move from Reference Offer (current state) to New Business Model by expl
         setModelBadge("Model: (not available)");
         showDebug(text);
         SELECTED_MODEL = null;
+        IMAGE_MODEL = null;
         return;
       }
 
       let data;
       try { data = JSON.parse(text); } catch { data = { raw: text }; }
 
-      const best = pickBestModel(data.models || []);
-      if (!best) {
+      SELECTED_MODEL = pickBestTextModel(data.models || []);
+      IMAGE_MODEL = pickBestImageModel(data.models || []);
+
+      if (!SELECTED_MODEL) {
         setModelBadge("Model: (none found)");
         showDebug(data);
-        SELECTED_MODEL = null;
         return;
       }
 
-      SELECTED_MODEL = best;
-      setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong>`);
+      setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong>` + (IMAGE_MODEL ? ` · <span style="opacity:.85">Images: ✅</span>` : ` · <span style="opacity:.85">Images: —</span>`));
     }
 
     /* ===== WIZARD STATE ===== */
@@ -455,12 +569,12 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       industry: "",
       industrySummary: "",
       underservedIdea: "",
-      directions: Array.from({length: 14}, () => ""), // answers
+      directions: Array.from({length: 14}, () => ""),
     };
 
-    const TOTAL_STEPS = 17; // 1 industry + 1 summary + 1 idea + 14 directions + 1 output
-    let currentStep = 1;    // 1..17
-    let directionIndex = 0; // 0..13
+    const TOTAL_STEPS = 17;
+    let currentStep = 1;
+    let directionIndex = 0;
 
     const stepBadge = document.getElementById("stepBadge");
     const progressBar = document.getElementById("progressBar");
@@ -478,7 +592,7 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    /* ===== DIRECTIONS (questions one at a time) ===== */
+    /* ===== DIRECTIONS ===== */
     const DIRECTION_QS = [
       { n: 1,  title: "Reduce customer overall costs", q: "How could you lower the customer’s total cost (price, ownership, time, switching) in this industry?", hint: "Think: cheaper, fewer steps, less waste, lower risk, fewer add-ons." },
       { n: 2,  title: "Reduce customer hassles", q: "What are the biggest pain points/hassles today, and how could you remove them?", hint: "Think: paperwork, waiting, uncertainty, confusing choices, hidden fees." },
@@ -498,20 +612,23 @@ Process: move from Reference Offer (current state) to New Business Model by expl
 
     function renderDirection(i) {
       directionIndex = i;
-
       const d = DIRECTION_QS[i];
       document.getElementById("directionTitle").textContent = `Direction ${d.n} of 14 — ${d.title}`;
       document.getElementById("directionLabel").textContent = d.q;
       document.getElementById("directionHint").textContent = d.hint || "";
       document.getElementById("directionAnswer").value = state.directions[i] || "";
-
-      // steps: 4..17 correspond to direction 1..14, then output
       setStep(4 + i);
       subline.textContent = "Answer each Direction (or Skip). After 14, we generate a full Odyssey 3.14 model.";
     }
 
-    /* ===== AI CALL (with retry on 503) ===== */
-    async function callGemini(promptText) {
+    /* ===== Markdown render helper ===== */
+    function renderMarkdownInto(el, md) {
+      const html = DOMPurify.sanitize(marked.parse(md || ""));
+      el.innerHTML = html || "<p><em>(No output returned.)</em></p>";
+    }
+
+    /* ===== AI CALL (text) with retry on 503 ===== */
+    async function callGeminiText(promptText) {
       if (!SELECTED_MODEL) throw new Error("No model selected. Click Re-check model.");
 
       const url = `${BASE}/${SELECTED_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
@@ -549,31 +666,79 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       throw new Error("Unexpected error.");
     }
 
-    /* ===== SCREEN LOGIC ===== */
+    /* ===== AI CALL (image) ===== */
+    async function callGeminiImage(imagePrompt) {
+      if (!IMAGE_MODEL) throw new Error("No image model is available for this API key.");
 
-    // Screen 1
+      const url = `${BASE}/${IMAGE_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+      let attempts = 0;
+      const maxAttempts = 3;
+
+      while (attempts < maxAttempts) {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: imagePrompt }] }]
+          })
+        });
+
+        const raw = await res.text();
+
+        if (res.ok) {
+          const data = JSON.parse(raw);
+          const parts = data.candidates?.[0]?.content?.parts || [];
+          // Look for inlineData with image
+          for (const p of parts) {
+            if (p.inlineData && p.inlineData.data && p.inlineData.mimeType) {
+              const mime = p.inlineData.mimeType;
+              const b64 = p.inlineData.data;
+              return { mime, b64 };
+            }
+          }
+          throw new Error("Image model responded but no inline image data was returned.");
+        }
+
+        if (res.status === 503) {
+          attempts++;
+          if (attempts >= maxAttempts) throw new Error("Image model overloaded (503). Try again in 30–60 seconds.");
+          await new Promise(r => setTimeout(r, 1200 * attempts));
+          continue;
+        }
+
+        throw new Error(`Gemini image error ${res.status}: ${raw}`);
+      }
+
+      throw new Error("Unexpected image error.");
+    }
+
+    /* ===== SCREEN LOGIC ===== */
     const industryInput = document.getElementById("industryInput");
     const btnIndustryNext = document.getElementById("btnIndustryNext");
     const errorIndustry = document.getElementById("errorIndustry");
 
+    const summaryTextEl = document.getElementById("summaryText");
+    const errorSummary = document.getElementById("errorSummary");
+    const btnSummaryImage = document.getElementById("btnSummaryImage");
+    const summaryImgBlock = document.getElementById("summaryImgBlock");
+    const summaryImg = document.getElementById("summaryImg");
+    const summaryImgCap = document.getElementById("summaryImgCap");
+
     btnIndustryNext.addEventListener("click", async () => {
       errorIndustry.textContent = "";
       const industry = industryInput.value.trim();
-      if (!industry) {
-        errorIndustry.textContent = "Please enter an industry.";
-        return;
-      }
-      if (!SELECTED_MODEL) {
-        errorIndustry.textContent = "Model not ready. Click “Re-check model” and try again.";
-        return;
-      }
+      if (!industry) { errorIndustry.textContent = "Please enter an industry."; return; }
+      if (!SELECTED_MODEL) { errorIndustry.textContent = "Model not ready. Click “Re-check model” and try again."; return; }
 
       state.industry = industry;
       setStep(2);
       showScreen("screenSummary");
       subline.textContent = "Generating a high-level snapshot of today’s industry players (VP + VA)…";
 
-      // generate summary
+      summaryImgBlock.style.display = "none";
+      summaryImg.src = "";
+      summaryImgCap.textContent = "";
+
       const prompt = `
 ${SYSTEM_CONTEXT}
 
@@ -581,48 +746,84 @@ Task:
 The student chose this industry: "${industry}".
 
 Write a HIGH-LEVEL snapshot of the main current players in this industry.
-Do NOT invent specific company financials. You may name typical player types (e.g., "large incumbents", "low-cost entrants", "premium niche brands") and if you mention example brands, label them as examples.
+Do NOT invent specific company financials. You may name typical player types and if you mention example brands, label them as examples.
+
+IMPORTANT: Format your answer as clean Markdown with headings, bullet lists, and a small table if useful.
 
 Output format (use EXACT headings):
-1) Industry map (who plays)
-2) Typical Value Proposition (VP) today
-   - What
-   - To whom
-   - At what price (pricing patterns)
-3) Typical Value Architecture (VA) today
-   - Value chain (key steps)
-   - Value network (partners/stakeholders)
-   - Strategic resources & competencies
-4) Current unmet needs / tensions (5 bullets)
+## 1) Industry map (who plays)
+## 2) Typical Value Proposition (VP) today
+- **What**
+- **To whom**
+- **At what price** (pricing patterns)
+## 3) Typical Value Architecture (VA) today
+- **Value chain** (key steps)
+- **Value network** (partners/stakeholders)
+- **Strategic resources & competencies**
+## 4) Current unmet needs / tensions
+- 5 bullets
 
-Keep it under ~350 words. Concrete and structured.
+Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it helps readability.
       `.trim();
 
-      const summaryTextEl = document.getElementById("summaryText");
-      const errorSummary = document.getElementById("errorSummary");
-      summaryTextEl.textContent = "Generating…";
+      renderMarkdownInto(summaryTextEl, "_Generating…_");
       errorSummary.textContent = "";
 
       try {
-        const out = await callGemini(prompt);
+        const out = await callGeminiText(prompt);
         state.industrySummary = out;
-        summaryTextEl.textContent = out || "(No output returned.)";
+        renderMarkdownInto(summaryTextEl, out);
         subline.textContent = "Read the snapshot, then continue.";
       } catch (e) {
-        summaryTextEl.textContent = "";
+        summaryTextEl.innerHTML = "";
         errorSummary.textContent = String(e.message || e);
         showDebug(String(e));
       }
     });
 
-    // Screen 2
+    // Image for industry snapshot
+    btnSummaryImage.addEventListener("click", async () => {
+      errorSummary.textContent = "";
+      if (!state.industry) { errorSummary.textContent = "Enter an industry first."; return; }
+      if (!IMAGE_MODEL) {
+        errorSummary.textContent = "No image model is available for this API key (text features still work).";
+        return;
+      }
+
+      btnSummaryImage.disabled = true;
+      btnSummaryImage.textContent = "Generating visual…";
+
+      try {
+        const imgPrompt = `
+Create a single, high-quality illustrative image for a student project.
+Theme: "${state.industry}" industry.
+Style: modern infographic + subtle parchment/epic vibe, clean composition, no text-heavy labels.
+Include: 1–2 simple icons that hint at value chain + customers (very minimal).
+Avoid: logos, brand names, copyrighted characters, and excessive text.
+        `.trim();
+
+        const { mime, b64 } = await callGeminiImage(imgPrompt);
+        summaryImg.src = `data:${mime};base64,${b64}`;
+        summaryImgCap.textContent = `AI-generated visual for: ${state.industry}`;
+        summaryImgBlock.style.display = "block";
+      } catch (e) {
+        errorSummary.textContent = String(e.message || e);
+      } finally {
+        btnSummaryImage.disabled = false;
+        btnSummaryImage.textContent = "Generate an industry visual";
+      }
+    });
+
+    // Screen 2 nav
     const btnSummaryContinue = document.getElementById("btnSummaryContinue");
     const btnSummaryBack = document.getElementById("btnSummaryBack");
+
     btnSummaryContinue.addEventListener("click", () => {
       setStep(3);
       showScreen("screenIdea");
       subline.textContent = "Now define the underserved value you want to create.";
     });
+
     btnSummaryBack.addEventListener("click", () => {
       setStep(1);
       showScreen("screenIndustry");
@@ -638,10 +839,7 @@ Keep it under ~350 words. Concrete and structured.
     btnIdeaContinue.addEventListener("click", () => {
       errorIdea.textContent = "";
       const idea = ideaInput.value.trim();
-      if (!idea) {
-        errorIdea.textContent = "Please write at least one underserved value idea (even a rough one).";
-        return;
-      }
+      if (!idea) { errorIdea.textContent = "Please write at least one underserved value idea (even a rough one)."; return; }
       state.underservedIdea = idea;
       showScreen("screenDirections");
       renderDirection(0);
@@ -653,7 +851,7 @@ Keep it under ~350 words. Concrete and structured.
       subline.textContent = "Read the snapshot, then continue.";
     });
 
-    // Screen 4 (Directions)
+    // Screen 4 directions
     const directionAnswer = document.getElementById("directionAnswer");
     const btnDirNext = document.getElementById("btnDirNext");
     const btnDirSkip = document.getElementById("btnDirSkip");
@@ -668,12 +866,8 @@ Keep it under ~350 words. Concrete and structured.
       errorDir.textContent = "";
       saveCurrentDirectionAnswer();
 
-      if (directionIndex < 13) {
-        renderDirection(directionIndex + 1);
-        return;
-      }
+      if (directionIndex < 13) { renderDirection(directionIndex + 1); return; }
 
-      // done with 14 directions → output
       setStep(17);
       showScreen("screenOutput");
       subline.textContent = "Generating your new Odyssey 3.14 business model…";
@@ -682,7 +876,6 @@ Keep it under ~350 words. Concrete and structured.
 
     btnDirSkip.addEventListener("click", () => {
       errorDir.textContent = "";
-      // keep current answer blank (or whatever typed); treat as pass if empty
       saveCurrentDirectionAnswer();
 
       if (directionIndex < 13) {
@@ -702,34 +895,45 @@ Keep it under ~350 words. Concrete and structured.
       if (directionIndex > 0) {
         renderDirection(directionIndex - 1);
       } else {
-        // go back to idea screen
         setStep(3);
         showScreen("screenIdea");
         subline.textContent = "Now define the underserved value you want to create.";
       }
     });
 
-    // Screen 5 (Output)
-    const finalOutput = document.getElementById("finalOutput");
+    // Screen 5 output
+    const finalOutputEl = document.getElementById("finalOutput");
     const errorOutput = document.getElementById("errorOutput");
     const btnRestart = document.getElementById("btnRestart");
     const btnOutputBack = document.getElementById("btnOutputBack");
 
+    const btnFinalImage = document.getElementById("btnFinalImage");
+    const finalImgBlock = document.getElementById("finalImgBlock");
+    const finalImg = document.getElementById("finalImg");
+    const finalImgCap = document.getElementById("finalImgCap");
+
     btnRestart.addEventListener("click", () => {
-      // reset state
       state.industry = "";
       state.industrySummary = "";
       state.underservedIdea = "";
       state.directions = Array.from({length: 14}, () => "");
+
       industryInput.value = "";
-      document.getElementById("summaryText").textContent = "";
       ideaInput.value = "";
-      finalOutput.textContent = "";
-      errorOutput.textContent = "";
+
+      summaryTextEl.innerHTML = "";
+      finalOutputEl.innerHTML = "";
+
+      summaryImgBlock.style.display = "none";
+      finalImgBlock.style.display = "none";
+      summaryImg.src = "";
+      finalImg.src = "";
+
       errorIndustry.textContent = "";
-      document.getElementById("errorSummary").textContent = "";
+      errorSummary.textContent = "";
       errorIdea.textContent = "";
       errorDir.textContent = "";
+      errorOutput.textContent = "";
       hideDebug();
 
       setStep(1);
@@ -738,17 +942,19 @@ Keep it under ~350 words. Concrete and structured.
     });
 
     btnOutputBack.addEventListener("click", () => {
-      // return to last direction
       showScreen("screenDirections");
       renderDirection(13);
     });
 
     async function generateFinalModel() {
-      finalOutput.textContent = "Generating…";
+      renderMarkdownInto(finalOutputEl, "_Generating…_");
       errorOutput.textContent = "";
       hideDebug();
 
-      // Build a compact view of answers
+      finalImgBlock.style.display = "none";
+      finalImg.src = "";
+      finalImgCap.textContent = "";
+
       const answered = DIRECTION_QS.map((d, idx) => {
         const a = (state.directions[idx] || "").trim();
         return `Direction ${d.n} (${d.title}): ${a ? a : "(pass)"}`;
@@ -770,51 +976,85 @@ Student answers to the 14 Directions:
 ${answered}
 
 Task:
-Propose ONE coherent "New Business Model" that clearly builds on:
-- the industry snapshot,
-- the underserved value idea,
-- and the Direction answers (use any non-pass answers; if many are pass, you choose 3–5 strong directions).
+Propose ONE coherent "New Business Model" that builds on:
+- industry snapshot,
+- underserved idea,
+- and Direction answers.
+
+IMPORTANT: Format your answer as clean Markdown with headings, bullet lists, and a small score table for Contributions.
 
 Output format (use EXACT headings):
-A) New Business Model (Odyssey 3.14)
-1) Value Proposition (VP)
-- What:
-- To whom:
-- At what price (pricing model):
-2) Value Architecture (VA)
-- Value chain (key steps):
-- Value network (key partners/stakeholders):
-- Strategic resources & competencies:
-3) Profit Equation
-- Revenue:
-- Costs:
-- Capital employed:
+## A) New Business Model (Odyssey 3.14)
+### 1) Value Proposition (VP)
+- **What:**
+- **To whom:**
+- **At what price (pricing model):**
+### 2) Value Architecture (VA)
+- **Value chain (key steps):**
+- **Value network (key partners/stakeholders):**
+- **Strategic resources & competencies:**
+### 3) Profit Equation
+- **Revenue:**
+- **Costs:**
+- **Capital employed:**
 
-B) Contributions evaluation
-- Financial (score 1–5 + 3 bullets)
-- Environmental (score 1–5 + 3 bullets)
-- Societal (score 1–5 + 3 bullets)
-- One key trade-off:
+## B) Contributions evaluation
+Provide a table with columns: Dimension | Score (1–5) | Why (3 bullets)
+Also add: **One key trade-off**
 
-C) 5 Next experiments
+## C) 5 Next experiments
 - Five low-cost tests for next week.
 
 Constraints:
-- Be concrete; avoid generic advice.
-- Do NOT invent precise market numbers; label assumptions explicitly.
+- Concrete, not generic.
+- Don’t invent precise market numbers; label assumptions.
 - Keep under ~700 words.
       `.trim();
 
       try {
-        const out = await callGemini(prompt);
-        finalOutput.textContent = out || "(No output returned.)";
+        const out = await callGeminiText(prompt);
+        renderMarkdownInto(finalOutputEl, out);
         subline.textContent = "Done. You can go back and tweak answers, then regenerate.";
       } catch (e) {
-        finalOutput.textContent = "";
+        finalOutputEl.innerHTML = "";
         errorOutput.textContent = String(e.message || e);
         showDebug(String(e));
       }
     }
+
+    // Concept image generation
+    btnFinalImage.addEventListener("click", async () => {
+      errorOutput.textContent = "";
+      if (!state.industry) { errorOutput.textContent = "Missing industry."; return; }
+      if (!IMAGE_MODEL) {
+        errorOutput.textContent = "No image model is available for this API key (text features still work).";
+        return;
+      }
+
+      btnFinalImage.disabled = true;
+      btnFinalImage.textContent = "Generating visual…";
+
+      try {
+        const conceptPrompt = `
+Create a single, high-quality concept illustration for a new business model in the "${state.industry}" industry.
+Core underserved value idea: "${state.underservedIdea}"
+
+Style: clean modern product concept art + subtle epic/parchment vibe. Cinematic lighting, simple composition.
+Include: a central “hero” object/service scene plus small hints of value chain (e.g., icons or minimal elements).
+Avoid: logos, brand names, and lots of text.
+        `.trim();
+
+        const { mime, b64 } = await callGeminiImage(conceptPrompt);
+        finalImg.src = `data:${mime};base64,${b64}`;
+        finalImgCap.textContent = `AI-generated concept visual for the new business model idea`;
+        finalImgBlock.style.display = "block";
+      } catch (e) {
+        errorOutput.textContent = String(e.message || e);
+      } finally {
+        btnFinalImage.disabled = false;
+        btnFinalImage.textContent = "Generate a concept visual";
+      }
+    });
 
     /* ===== INIT ===== */
     refreshModelsBtn.addEventListener("click", detectModel);
