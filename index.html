@@ -279,18 +279,23 @@
       font-weight: 800;
     }
 
-    /* ===== Auto visuals ===== */
+    /* ===== Auto visuals (✅ made ~2x smaller) ===== */
     .imgWrap{
       margin-top: 12px;
       border-radius: 18px;
       overflow:hidden;
       border: 1px solid rgba(17,24,39,0.12);
       background: rgba(255,255,255,0.55);
+      max-width: 520px;     /* was effectively full width */
+      margin-left: auto;
+      margin-right: auto;
     }
     .imgWrap img{
       display:block;
       width:100%;
       height:auto;
+      max-height: 320px;    /* prevents “entire screen” tall images */
+      object-fit: cover;    /* keeps it nice-looking */
     }
     .imgCap{
       padding:10px 12px;
@@ -326,8 +331,6 @@
       <label for="industryInput">What is an industry you are interested in innovating within?</label>
       <input id="industryInput" type="text" placeholder="e.g., ski bindings, fast fashion, coffee shops, private tutoring…" />
       <div class="hint">Be specific if you can (e.g., “budget airlines in Europe” instead of “airlines”).</div>
-
-      <!-- ✅ Knowledge upload UI REMOVED -->
 
       <div class="actions">
         <button id="btnIndustryNext" type="button">Continue</button>
@@ -551,6 +554,34 @@ A complete Odyssey 3.14 output includes:
 • One key trade-off and how you handle it
 `;
 
+    /* ============================================================
+       ✅ Background image reliability fix (preload + fallback)
+       ============================================================ */
+    function preloadImage(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(url);
+        img.onerror = () => reject(new Error("Failed to load: " + url));
+        img.src = url;
+      });
+    }
+
+    async function setBackgroundWithFallback(urls) {
+      const root = document.documentElement;
+      for (const u of urls) {
+        try {
+          await preloadImage(u);
+          root.style.setProperty("--bg-img", `url("${u}")`);
+          return;
+        } catch {}
+      }
+      // Final fallback: stable direct upload URL (no redirects)
+      root.style.setProperty(
+        "--bg-img",
+        `url("https://upload.wikimedia.org/wikipedia/commons/2/2e/Ulysses_and_the_Sirens_-_John_William_Waterhouse.jpg")`
+      );
+    }
+
     /* ===== Background randomizer (MORE Odyssey art + better look) ===== */
     function applyRandomTheme() {
       const root = document.documentElement;
@@ -582,8 +613,9 @@ A complete Odyssey 3.14 output includes:
         "https://commons.wikimedia.org/wiki/Special:FilePath/Tapestry_with_Odysseus_on_a_hunt_by_Brussels_workshop,_17th_century_PD-art_-old,_Olesko_Castle,_possibly_from_John_III_Sobieski%27s_collection.jpg?width=2200"
       ];
 
-      const img = overlays[Math.floor(Math.random() * overlays.length)];
-      root.style.setProperty("--bg-img", `url("${img}")`);
+      // ✅ PRELOAD + FALLBACK so we don't get a blank background image layer
+      const shuffled = overlays.slice().sort(() => Math.random() - 0.5);
+      setBackgroundWithFallback(shuffled);
 
       const op = (0.10 + Math.random() * 0.08).toFixed(2);
       root.style.setProperty("--bg-op", op);
@@ -628,7 +660,7 @@ A complete Odyssey 3.14 output includes:
       const q = encodeURIComponent(query);
       const url =
         `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${q}` +
-        `&gsrlimit=6&prop=pageimages|info&inprop=url&pithumbsize=1600&format=json&origin=*`;
+        `&gsrlimit=6&prop=pageimages|info&inprop=url&pithumbsize=900&format=json&origin=*`; /* ✅ smaller */
 
       const res = await fetch(url);
       if (!res.ok) throw new Error("Wikipedia image search failed.");
@@ -653,7 +685,7 @@ A complete Odyssey 3.14 output includes:
 
     function unsplashFallback(query) {
       const q = encodeURIComponent(query.replace(/[^\w\s-]/g, "").trim());
-      return `https://source.unsplash.com/1600x900/?${q}`;
+      return `https://source.unsplash.com/900x500/?${q}`; /* ✅ smaller */
     }
 
     async function setIndustryImageEverywhere(industry) {
@@ -729,7 +761,6 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
     }
 
     function buildKnowledgeBlock() {
-      // Safety clamp so prompts don't explode.
       const k = clampText(state.odysseyKnowledge || "", 12000);
       return k ? k : "None provided.";
     }
@@ -817,7 +848,6 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       directions: Array.from({length: 14}, () => ""),
       finalModelText: "",
       finalImgUrl: "",
-      // ✅ Built-in knowledge loaded automatically (no upload/override path)
       odysseyKnowledge: ODYSSEY_KNOWLEDGE_HARDCODED
     };
 
