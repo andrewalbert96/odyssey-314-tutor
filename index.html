@@ -6,19 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, sans-serif;
       background: #f3f4f6;
+      margin: 0;
       display: flex;
       justify-content: center;
-      margin: 0;
     }
     .container {
       max-width: 900px;
       width: 100%;
       padding: 24px;
     }
+    textarea { width: 100%; min-height: 150px; }
     button {
-      margin-top: 16px;
+      margin-top: 12px;
       padding: 10px 18px;
       border-radius: 999px;
       border: none;
@@ -29,12 +30,11 @@
     }
     .error { color: #b91c1c; margin-top: 8px; }
     .card {
-      margin-top: 24px;
+      margin-top: 20px;
       padding: 16px;
       background: white;
       border-radius: 12px;
     }
-    textarea { width: 100%; min-height: 150px; }
     pre { white-space: pre-wrap; }
   </style>
 </head>
@@ -65,11 +65,11 @@
 </div>
 
 <script>
-/* ===== CONFIG ===== */
-const GEMINI_API_KEY = "AIzaSyDcOqoV01wcmFJPF8GYS1Y4CBCK9z8gOww"; // <-- paste yours
-const MODEL = "models/gemini-1.0-pro";
+/* === CONFIG === */
+const GEMINI_API_KEY = "AIzaSyDcOqoV01wcmFJPF8GYS1Y4CBCK9z8gOww";
+const MODEL = "models/gemini-pro";
 
-/* ===== APP ===== */
+/* === APP === */
 const btn = document.getElementById("btn");
 const error = document.getElementById("error");
 const card = document.getElementById("card");
@@ -87,15 +87,15 @@ btn.onclick = async () => {
   }
 
   const prompt = `
-You are an Odyssey 3.14 tutor.
+You are a tutor for the Odyssey 3.14 framework.
 
 Step: ${step}
 Student text:
 ${draft}
 
 Give:
-1. Evaluation
-2. 3 suggestions
+1. Short evaluation
+2. 3 improvement suggestions
 3. Checklist
 `;
 
@@ -111,7 +111,8 @@ Give:
   );
 
   if (!res.ok) {
-    error.textContent = `Gemini error ${res.status}`;
+    const t = await res.text();
+    error.textContent = `Gemini error ${res.status}: ${t}`;
     return;
   }
 
