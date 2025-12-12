@@ -4,181 +4,374 @@
   <meta charset="UTF-8" />
   <title>Odyssey 3.14 AI Tutor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Epic/classic fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Crimson+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    body { font-family: system-ui, sans-serif; background:#f3f4f6; margin:0; display:flex; justify-content:center; }
-    .container { max-width: 900px; width:100%; padding:24px; }
-    textarea { width:100%; min-height:150px; padding:10px; border:1px solid #d1d5db; border-radius:8px; box-sizing:border-box; }
-    select { width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px; box-sizing:border-box; }
-    button { margin-top:12px; padding:10px 18px; border-radius:999px; border:none; background:#2563eb; color:#fff; font-weight:600; cursor:pointer; }
-    button:disabled { opacity:0.6; cursor:default; }
-    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-    .badge { display:inline-block; padding:4px 10px; border:1px solid #e5e7eb; border-radius:999px; background:#fff; font-size:12px; color:#374151; }
-    .error { color:#b91c1c; margin-top:8px; white-space:pre-wrap; }
-    .card { margin-top:20px; padding:16px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; }
-    pre { white-space:pre-wrap; margin:0; }
-    h1 { margin:0 0 4px 0; }
-    p { margin:0 0 12px 0; color:#6b7280; }
-    label { font-weight:600; display:block; margin-top:14px; margin-bottom:6px; }
+    :root{
+      --ink:#111827;
+      --muted:#6b7280;
+      --paper: rgba(255, 255, 255, 0.86);
+      --paper-strong: rgba(255, 255, 255, 0.92);
+      --border: rgba(17,24,39,0.12);
+      --accent:#2563eb;
+      --accent2:#1d4ed8;
+      --danger:#b91c1c;
+    }
+
+    /* Odyssey-themed background */
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      color:var(--ink);
+      font-family: "Crimson Pro", ui-serif, Georgia, serif;
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(255,237,213,0.95), rgba(243,244,246,0.8) 55%, rgba(243,244,246,1)),
+        #f3f4f6;
+      position:relative;
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      /* Public-domain-style Odyssey illustration via Wikimedia */
+      background-image: url("https://upload.wikimedia.org/wikipedia/commons/8/89/OdysseySuitors.png");
+      background-size: cover;
+      background-position: center;
+      opacity: 0.12;
+      filter: blur(0.6px);
+      pointer-events:none;
+      z-index:-1;
+    }
+
+    .container{
+      max-width: 980px;
+      width:100%;
+      padding: 28px 18px 44px;
+    }
+
+    header{
+      margin-bottom: 14px;
+    }
+
+    h1{
+      font-family: "Cinzel", ui-serif, serif;
+      letter-spacing: 0.02em;
+      font-weight: 900;
+      font-size: clamp(28px, 3.2vw, 44px);
+      margin: 0 0 6px 0;
+    }
+
+    h2{
+      margin:0 0 10px 0;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .small{
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    label{
+      display:block;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    select, textarea{
+      width:100%;
+      box-sizing:border-box;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--paper);
+      outline:none;
+      transition: box-shadow .15s ease, border-color .15s ease;
+    }
+
+    select:focus, textarea:focus{
+      border-color: rgba(37,99,235,0.55);
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.14);
+    }
+
+    textarea{ min-height: 170px; resize: vertical; }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 10px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--paper);
+      font-size: 13px;
+      font-weight: 700;
+      color:#374151;
+    }
+
+    .dot{
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(37,99,235,0.8);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    }
+
+    button{
+      padding: 11px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(37,99,235,0.25);
+      background: linear-gradient(180deg, var(--accent), var(--accent2));
+      color:white;
+      font-weight: 900;
+      cursor:pointer;
+      box-shadow: 0 10px 30px rgba(17,24,39,0.12);
+      transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
+    }
+
+    button:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+    button:active{ transform: translateY(0px); }
+    button:disabled{ opacity:0.6; cursor:default; box-shadow:none; }
+
+    .primary-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 14px;
+    }
+
+    .secondary{
+      background: rgba(255,255,255,0.55);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      box-shadow: none;
+      font-weight: 800;
+    }
+
+    .secondary:hover{
+      filter: none;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(17,24,39,0.08);
+    }
+
+    .error{
+      color: var(--danger);
+      margin-top: 10px;
+      font-weight: 700;
+      white-space: pre-wrap;
+    }
+
+    .card{
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: var(--paper-strong);
+      border: 1px solid var(--border);
+      box-shadow: 0 16px 40px rgba(17,24,39,0.10);
+    }
+
+    .card h3{
+      margin: 0 0 10px 0;
+      font-family: "Cinzel", ui-serif, serif;
+      letter-spacing: 0.01em;
+      font-weight: 800;
+    }
+
+    pre{
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin:0;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .footer-note{
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
   </style>
 </head>
 
 <body>
-<div class="container">
-  <h1>Odyssey 3.14 AI Tutor</h1>
-  <p>Pick a step, paste your draft, get feedback. (This version auto-detects the best available Gemini model.)</p>
+  <div class="container">
+    <header>
+      <h1>Odyssey 3.14 AI Tutor</h1>
+      <h2>Write a step. Get feedback. Iterate like a hero.</h2>
+      <p class="small">This page auto-detects the best Gemini model your API key can use (no more model-name guessing).</p>
 
-  <div class="row">
-    <span class="badge" id="modelBadge">Model: (detecting…)</span>
-    <button id="refreshModelsBtn" type="button">Re-check models</button>
+      <div class="row">
+        <span class="badge" id="modelBadge"><span class="dot"></span>Model: (detecting…)</span>
+      </div>
+    </header>
+
+    <main>
+      <label for="step">Which Odyssey 3.14 step?</label>
+      <select id="step">
+        <option>Vision</option>
+        <option>Business arena</option>
+        <option>Value proposition</option>
+        <option>Resources & capabilities</option>
+        <option>Key activities</option>
+        <option>Revenue model</option>
+        <option>Cost structure</option>
+        <option>Differentiation</option>
+        <option>Innovation levers</option>
+      </select>
+
+      <label for="draft">Your draft</label>
+      <textarea id="draft" placeholder="Write your draft here… (5–10 lines is enough)"></textarea>
+
+      <div class="primary-actions">
+        <button id="btn" type="button">Get feedback</button>
+        <button id="refreshModelsBtn" class="secondary" type="button">Re-check model</button>
+      </div>
+
+      <div id="error" class="error"></div>
+
+      <section id="card" class="card" style="display:none;">
+        <h3>AI feedback</h3>
+        <pre id="output"></pre>
+        <p class="footer-note">Use this as coaching, not as an “answer key.” Always apply your own judgment.</p>
+      </section>
+
+      <section id="debug" class="card" style="display:none;">
+        <h3>Debug</h3>
+        <pre id="debugText"></pre>
+      </section>
+    </main>
   </div>
 
-  <label>Which Odyssey 3.14 step?</label>
-  <select id="step">
-    <option>Vision</option>
-    <option>Business arena</option>
-    <option>Value proposition</option>
-    <option>Resources & capabilities</option>
-    <option>Key activities</option>
-    <option>Revenue model</option>
-    <option>Cost structure</option>
-    <option>Differentiation</option>
-    <option>Innovation levers</option>
-  </select>
+  <script>
+    /* ===== CONFIG ===== */
+    const GEMINI_API_KEY = "AIzaSyDcOqoV01wcmFJPF8GYS1Y4CBCK9z8gOww"; // <-- paste your key here
 
-  <label>Your draft</label>
-  <textarea id="draft" placeholder="Write your draft here…"></textarea>
+    /* ===== CONSTANTS ===== */
+    const BASE = "https://generativelanguage.googleapis.com/v1beta";
+    let SELECTED_MODEL = null;
 
-  <button id="btn" type="button">Get feedback</button>
-  <div id="error" class="error"></div>
+    const btn = document.getElementById("btn");
+    const refreshModelsBtn = document.getElementById("refreshModelsBtn");
+    const error = document.getElementById("error");
+    const card = document.getElementById("card");
+    const output = document.getElementById("output");
+    const modelBadge = document.getElementById("modelBadge");
+    const debug = document.getElementById("debug");
+    const debugText = document.getElementById("debugText");
 
-  <div id="card" class="card" style="display:none;">
-    <h3 style="margin-top:0;">AI feedback</h3>
-    <pre id="output"></pre>
-  </div>
+    function showError(msg) {
+      error.textContent = msg || "";
+    }
+    function showDebug(obj) {
+      debug.style.display = "block";
+      debugText.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+    }
+    function hideDebug() {
+      debug.style.display = "none";
+      debugText.textContent = "";
+    }
+    function setModelBadge(text) {
+      modelBadge.innerHTML = `<span class="dot"></span>${text}`;
+    }
 
-  <div id="debug" class="card" style="display:none;">
-    <h3 style="margin-top:0;">Debug</h3>
-    <pre id="debugText"></pre>
-  </div>
-</div>
+    // Pick the best model from ListModels results (must support generateContent)
+    function pickBestModel(models) {
+      const usable = (models || []).filter(m =>
+        Array.isArray(m.supportedGenerationMethods) &&
+        m.supportedGenerationMethods.includes("generateContent") &&
+        typeof m.name === "string"
+      );
+      if (usable.length === 0) return null;
 
-<script>
-/* ===== CONFIG ===== */
-const GEMINI_API_KEY = "AIzaSyDcOqoV01wcmFJPF8GYS1Y4CBCK9z8gOww"; // <-- paste your key here
+      const score = (name) => {
+        const n = name.toLowerCase();
+        if (n.includes("2.5") && n.includes("flash")) return 500;
+        if (n.includes("flash")) return 400;
+        if (n.includes("pro")) return 300;
+        return 200;
+      };
 
-/* ===== CONSTANTS ===== */
-const BASE = "https://generativelanguage.googleapis.com/v1beta";
-let SELECTED_MODEL = null;
+      usable.sort((a, b) => score(b.name) - score(a.name));
+      return usable[0].name;
+    }
 
-const btn = document.getElementById("btn");
-const refreshModelsBtn = document.getElementById("refreshModelsBtn");
-const error = document.getElementById("error");
-const card = document.getElementById("card");
-const output = document.getElementById("output");
-const modelBadge = document.getElementById("modelBadge");
-const debug = document.getElementById("debug");
-const debugText = document.getElementById("debugText");
+    async function detectModel() {
+      hideDebug();
+      showError("");
+      setModelBadge("Model: (detecting…)");
 
-function showError(msg) {
-  error.textContent = msg || "";
-}
-function showDebug(obj) {
-  debug.style.display = "block";
-  debugText.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
-}
-function hideDebug() {
-  debug.style.display = "none";
-  debugText.textContent = "";
-}
-function setModelBadge(text) {
-  modelBadge.textContent = text;
-}
+      if (!GEMINI_API_KEY || GEMINI_API_KEY === "PUT_YOUR_KEY_HERE") {
+        setModelBadge("Model: (missing API key)");
+        showError("Paste your Gemini API key into GEMINI_API_KEY first.");
+        SELECTED_MODEL = null;
+        return;
+      }
 
-/** Pick the best model from ListModels results.
- * We only pick models that support "generateContent".
- * Preference order: flash > pro > anything else.
- */
-function pickBestModel(models) {
-  const usable = (models || []).filter(m =>
-    Array.isArray(m.supportedGenerationMethods) &&
-    m.supportedGenerationMethods.includes("generateContent") &&
-    typeof m.name === "string"
-  );
+      const url = `${BASE}/models?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+      const res = await fetch(url);
+      const text = await res.text();
 
-  if (usable.length === 0) return null;
+      if (!res.ok) {
+        setModelBadge("Model: (not available)");
+        showError(`Model list failed (${res.status}).`);
+        showDebug(text);
+        SELECTED_MODEL = null;
+        return;
+      }
 
-  // preference scoring
-  const score = (name) => {
-    const n = name.toLowerCase();
-    if (n.includes("flash")) return 300;
-    if (n.includes("pro")) return 200;
-    return 100;
-  };
+      let data;
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
 
-  usable.sort((a, b) => score(b.name) - score(a.name));
-  return usable[0].name; // e.g. "models/gemini-pro"
-}
+      const best = pickBestModel(data.models || []);
+      if (!best) {
+        setModelBadge("Model: (none found)");
+        showError("No models with generateContent are available for this key.");
+        showDebug(data);
+        SELECTED_MODEL = null;
+        return;
+      }
 
-async function detectModel() {
-  hideDebug();
-  showError("");
-  setModelBadge("Model: (detecting…)");
+      SELECTED_MODEL = best;
+      setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong>`);
+    }
 
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === "PUT_YOUR_KEY_HERE") {
-    setModelBadge("Model: (missing API key)");
-    showError("Paste your Gemini API key into GEMINI_API_KEY first.");
-    return;
-  }
+    async function generateFeedback() {
+      showError("");
+      hideDebug();
+      card.style.display = "none";
 
-  const url = `${BASE}/models?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+      if (!SELECTED_MODEL) {
+        showError("No model selected yet. Click “Re-check model” first.");
+        return;
+      }
 
-  const res = await fetch(url);
-  const text = await res.text();
+      const step = document.getElementById("step").value;
+      const draft = document.getElementById("draft").value.trim();
+      if (!draft) {
+        showError("Write something first.");
+        return;
+      }
 
-  if (!res.ok) {
-    setModelBadge("Model: (not available)");
-    showError(`Model list failed (${res.status}).`);
-    showDebug(text);
-    SELECTED_MODEL = null;
-    return;
-  }
-
-  let data;
-  try { data = JSON.parse(text); } catch { data = { raw: text }; }
-
-  const models = data.models || [];
-  const best = pickBestModel(models);
-
-  if (!best) {
-    setModelBadge("Model: (none found)");
-    showError("No models with generateContent are available for this key.");
-    showDebug(data);
-    SELECTED_MODEL = null;
-    return;
-  }
-
-  SELECTED_MODEL = best;
-  setModelBadge(`Model: ${SELECTED_MODEL}`);
-}
-
-async function generateFeedback() {
-  showError("");
-  hideDebug();
-  card.style.display = "none";
-
-  if (!SELECTED_MODEL) {
-    showError("No model selected yet. Click “Re-check models” first.");
-    return;
-  }
-
-  const step = document.getElementById("step").value;
-  const draft = document.getElementById("draft").value.trim();
-  if (!draft) {
-    showError("Write something first.");
-    return;
-  }
-
-  const prompt = `
+      const prompt = `
 You are an AI tutor helping students apply the Odyssey 3.14 business model innovation approach.
 
 Step: ${step}
@@ -190,52 +383,50 @@ Respond with:
 2) Suggestions (3–5 numbered, specific actions)
 3) Checklist (4–6 bullets starting with [ ] or [x])
 Keep it under ~300 words.
-  `.trim();
+      `.trim();
 
-  btn.disabled = true;
-  btn.textContent = "Getting feedback…";
+      btn.disabled = true;
+      btn.textContent = "Getting feedback…";
 
-  try {
-    const url = `${BASE}/${SELECTED_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
-      })
-    });
+      try {
+        const url = `${BASE}/${SELECTED_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
 
-    const raw = await res.text();
+        const raw = await res.text();
+        if (!res.ok) {
+          showError(`Gemini error ${res.status}`);
+          showDebug(raw);
+          return;
+        }
 
-    if (!res.ok) {
-      showError(`Gemini error ${res.status}`);
-      showDebug(raw);
-      return;
+        let data;
+        try { data = JSON.parse(raw); } catch { data = { raw }; }
+
+        const out =
+          data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("\n") ||
+          "No response text returned.";
+
+        output.textContent = out;
+        card.style.display = "block";
+      } catch (e) {
+        showError(String(e));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Get feedback";
+      }
     }
 
-    let data;
-    try { data = JSON.parse(raw); } catch { data = { raw }; }
+    refreshModelsBtn.addEventListener("click", detectModel);
+    btn.addEventListener("click", generateFeedback);
 
-    const out =
-      data.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("\n") ||
-      "No response text returned.";
-
-    output.textContent = out;
-    card.style.display = "block";
-
-  } catch (e) {
-    showError(String(e));
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Get feedback";
-  }
-}
-
-refreshModelsBtn.addEventListener("click", detectModel);
-btn.addEventListener("click", generateFeedback);
-
-// Auto-detect on load
-detectModel();
-</script>
+    // Auto-detect on load
+    detectModel();
+  </script>
 </body>
 </html>
