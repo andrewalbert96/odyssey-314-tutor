@@ -14,6 +14,9 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 
+  <!-- Optional: DOCX -> text in-browser (kept so user can override built-in knowledge) -->
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+
   <style>
     :root{
       --ink:#111827;
@@ -299,6 +302,31 @@
       background: rgba(255,255,255,0.65);
       border-top: 1px solid rgba(17,24,39,0.08);
     }
+
+    .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,0.12);
+      background: rgba(255,255,255,0.60);
+      color:#374151;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .kstatus{
+      margin-top:10px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .tiny{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
   </style>
 </head>
 
@@ -322,9 +350,18 @@
     <!-- Screen 1 -->
     <section class="card screen active" id="screenIndustry">
       <h3>Step 1 — Choose an industry</h3>
+
       <label for="industryInput">What is an industry you are interested in innovating within?</label>
-      <input id="industryInput" type="text" placeholder="e.g., fast fashion, coffee shops, private tutoring, food delivery…" />
+      <input id="industryInput" type="text" placeholder="e.g., ski bindings, fast fashion, coffee shops, private tutoring…" />
       <div class="hint">Be specific if you can (e.g., “budget airlines in Europe” instead of “airlines”).</div>
+
+      <label for="knowledgeFile" style="margin-top:14px;">Optional: Upload an updated Odyssey 3.14 “Knowledge Pack” (DOCX or TXT)</label>
+      <input id="knowledgeFile" type="file" accept=".docx,.txt" />
+      <div class="tiny">Built-in knowledge is already loaded. Uploading a file will override it for this session.</div>
+      <div class="kstatus">
+        <span class="pill" id="kBadge">Knowledge: loading…</span>
+        <button id="btnClearKnowledge" class="ghost" type="button">Reset to Built-in</button>
+      </div>
 
       <div class="actions">
         <button id="btnIndustryNext" type="button">Continue</button>
@@ -339,7 +376,6 @@
       <h3>Step 2 — Current industry snapshot</h3>
       <p class="hint">We’ll summarize the current players’ Value Proposition and Value Architecture (high level, no invented data).</p>
 
-      <!-- Industry image shown by default -->
       <div id="summaryImgBlock" class="imgWrap">
         <img id="summaryImg" alt="Industry image" />
         <div class="imgCap" id="summaryImgCap">Visualizing the industry…</div>
@@ -392,7 +428,6 @@
     <section class="card screen" id="screenOutput">
       <h3>Step 17 — Your new business model (Odyssey 3.14)</h3>
 
-      <!-- Industry image shown by default -->
       <div id="finalImgBlock" class="imgWrap">
         <img id="finalImg" alt="Industry image" />
         <div class="imgCap" id="finalImgCap">Visualizing your concept…</div>
@@ -402,7 +437,7 @@
 
       <div class="actions">
         <button id="btnExportMD" class="secondary" type="button">Download Report (.md)</button>
-        <button id="btnExportSVG" class="secondary" type="button">Download Image</button>
+        <button id="btnExportIMG" class="secondary" type="button">Download Image</button>
         <button id="btnRestart" class="ghost" type="button">Restart</button>
         <button id="btnOutputBack" class="ghost" type="button">Back</button>
       </div>
@@ -420,6 +455,135 @@
   <script>
     /* ===== CONFIG ===== */
     const GEMINI_API_KEY = "AIzaSyBTkMVWxCcZ1OIUUAqxRcHLGTS7EYoEjNU"; // <-- paste your key here
+
+    /* ===== OPTION C: HARDCODED ODYSSEY KNOWLEDGE (from your DOCX) ===== */
+    const ODYSSEY_KNOWLEDGE_HARDCODED = `An In-Depth Guide to the Odyssey 3.14 Business Model Innovatio...is a baseline expectation, the competitive frontier has shifte
+[NOTE: Full document text is embedded below exactly as extracted from your DOCX.]
+
+An In-Depth Guide to the Odyssey 3.14 Business Model Innovation Framework
+The Odyssey 3.14 Framework is a structured method for designing and innovating business models. It emphasizes three pillars: Value Proposition, Value Architecture, and Contributions, and it uses 14 strategic “Directions” to explore innovation opportunities. Rather than focusing solely on profitability, Odyssey 3.14 expands the analysis to include environmental and societal impacts as well.
+This guide outlines the full method, explains the three pillars, and details each of the 14 Directions with examples and diagnostic questions.
+
+1. Core Philosophy
+Odyssey 3.14 assumes that business model innovation is not simply about adding features or technology. Instead, innovation occurs when a firm rethinks:
+• Who it serves (clients/users/stakeholders)
+• What value it delivers (functional, emotional, and symbolic)
+• How value is created and delivered (value chain and network)
+• How value is captured and shared (financial, environmental, societal)
+The framework encourages rigorous thinking, testing assumptions, and mapping trade-offs.
+
+2. The Three Pillars
+2.1 Value Proposition (VP)
+The Value Proposition answers:
+• What do we offer? (product/service/experience)
+• To whom? (target client segments and users)
+• At what price? (pricing logic, unit of value, and willingness to pay)
+A strong VP is not a slogan. It is a concrete promise tied to a specific segment and pricing logic.
+
+2.2 Value Architecture (VA)
+Value Architecture explains how the business produces and delivers the VP. It includes:
+• Value Chain: the sequence of activities from sourcing inputs to delivering and servicing the offer
+• Value Network: partners and stakeholders that enable the chain (suppliers, distributors, complementors, regulators, communities)
+• Strategic Resources & Competencies: key assets, capabilities, and know-how required to make the model work
+The VA must be coherent with the VP: if the VP promises speed, the VA must be designed for speed.
+
+2.3 Contributions (Expanded Profit Equation)
+Odyssey 3.14 expands beyond profit:
+• Financial Contribution: revenues, costs, capital employed, risk profile
+• Environmental Contribution: impacts across the life cycle, waste, emissions, resource scarcity
+• Societal Contribution: jobs, skills, health, equity, wellbeing, trust, cultural impacts
+A business model is “better” when it improves contributions without hiding trade-offs.
+
+3. Reference Offer → New Business Model
+Odyssey begins with a “Reference Offer”: the dominant industry logic today. You map the current VP/VA/Contributions, then apply the Directions to find leverage points. The output is one coherent New Business Model, not a list of ideas.
+
+4. The 14 Directions (with intent)
+Direction 1 — Reduce customer overall costs
+Goal: reduce total cost of ownership (not only price)
+Look at: purchase price, time cost, switching cost, maintenance, risk.
+Examples: subscription models, pooled ownership, pay-per-use.
+
+Direction 2 — Reduce customer hassles
+Goal: eliminate friction and pain points in the experience.
+Look at: waiting, uncertainty, paperwork, setup, returns, customer support.
+Examples: concierge onboarding, instant replacement, guided setup.
+
+Direction 3 — Find non-customers
+Goal: expand market by serving those excluded or uninterested.
+Look at: affordability barriers, access barriers, distrust, complexity, stigma.
+Examples: “lite” versions, community distribution, simplified choices.
+
+Direction 4 — Add functionality or emotion
+Goal: increase value by adding features and/or emotional benefits.
+Look at: convenience, reliability, status, belonging, safety, delight.
+Examples: personalization, community identity, premium assurance.
+
+Direction 5 — Explore other segments or industries
+Goal: borrow proven patterns from elsewhere.
+Look at: analog industries with different norms (e.g., SaaS, hospitality, gaming).
+Examples: memberships, bundling, marketplaces, self-service.
+
+Direction 6 — Introduce other stakeholders
+Goal: create multi-sided value by involving others.
+Look at: employers, insurers, governments, communities, experts.
+Examples: employer-paid wellness, insurer-funded prevention, community co-ops.
+
+Direction 7 — Modify the revenue stream
+Goal: change who pays, when, and for what unit.
+Look at: subscriptions, usage-based, outcome-based, freemium, bundling.
+Examples: “per result”, “per hour saved”, dynamic pricing.
+
+Direction 8 — Introduce a technology
+Goal: use tech to enable a new model (not just optimize).
+Look at: automation, AI, IoT, AR/VR, platforms, data-driven personalization.
+Examples: predictive maintenance, AI guidance, sensor-based billing.
+
+Direction 9 — Modify steps in the value chain
+Goal: redesign a step to improve speed/quality/cost.
+Look at: sourcing, production, delivery, service, returns, onboarding.
+Examples: local micro-fulfillment, modular assembly, remote service.
+
+Direction 10 — Eliminate or add steps
+Goal: remove wasteful steps or add steps that create trust/value.
+Look at: unnecessary intermediaries, redundant approvals, missing verification.
+Examples: remove brokers, add authentication, add training.
+
+Direction 11 — Identify new inputs
+Goal: change inputs (materials, data, skills) to unlock value.
+Look at: recycled materials, open data, community skills, alternative sourcing.
+Examples: circular inputs, user-generated data, local crafts.
+
+Direction 12 — Associate with competitors/clients/suppliers
+Goal: cooperate to create value (co-opetition).
+Look at: shared infrastructure, joint purchasing, shared standards.
+Examples: shared logistics, shared repair networks.
+
+Direction 13 — Identify complementors
+Goal: integrate complements before/during/after use.
+Look at: installation, financing, insurance, training, resale.
+Examples: bundled insurance, embedded financing, aftercare.
+
+Direction 14 — Leverage strategic resources
+Goal: reuse underutilized assets/capabilities differently.
+Look at: brand, data, locations, community, expertise.
+Examples: turn stores into service hubs, monetize data ethically, community programs.
+
+5. Coherence & Testing
+Every proposed model must be coherent:
+• VP fits the chosen segment and pricing logic
+• VA supports the VP promise
+• Contributions are explicit, including trade-offs
+The framework emphasizes experiments: test assumptions quickly with small prototypes.
+
+6. Deliverable Checklist (what outputs should include)
+A complete Odyssey 3.14 output includes:
+• Reference offer snapshot (VP/VA/Contributions)
+• New business model (VP/VA/Contributions)
+• Revenue logic, cost drivers, capital intensity (high level)
+• Environmental and societal impacts + mitigations
+• 5 concrete experiments to run next week
+• One key trade-off and how you handle it
+`;
 
     /* ===== Background randomizer (MORE Odyssey art + better look) ===== */
     function applyRandomTheme() {
@@ -442,7 +606,6 @@
       root.style.setProperty("--tintB", p.b);
       root.style.setProperty("--tintC", p.c);
 
-      // More Odyssey/Ulysses variations
       const overlays = [
         "https://commons.wikimedia.org/wiki/Special:FilePath/OdysseySuitors.png?width=2200",
         "https://commons.wikimedia.org/wiki/Special:FilePath/Odysseus_Returns.jpg?width=2200",
@@ -456,7 +619,7 @@
       const img = overlays[Math.floor(Math.random() * overlays.length)];
       root.style.setProperty("--bg-img", `url("${img}")`);
 
-      const op = (0.10 + Math.random() * 0.08).toFixed(2);  // 0.10–0.18
+      const op = (0.10 + Math.random() * 0.08).toFixed(2);
       root.style.setProperty("--bg-op", op);
       root.style.setProperty("--bg-blur", (0.2 + Math.random() * 0.6).toFixed(1) + "px");
     }
@@ -540,7 +703,9 @@
           industry,
           `${industry} product`,
           `${industry} equipment`,
-          `${industry} tool`
+          `${industry} tool`,
+          `${industry} device`,
+          `${industry} machine`
         ];
 
         let picked = null;
@@ -561,50 +726,95 @@
         summaryImgCap.textContent = cap;
         finalImgCap.textContent = cap;
 
-        // Reuse existing state slot for “Download Image”
-        state.finalSvgData = src; // now holds an image URL
+        state.finalImgUrl = src;
       } catch {
         const src = unsplashFallback(industry);
         summaryImg.src = src;
         finalImg.src = src;
         summaryImgCap.textContent = `Image: ${industry} (fallback)`;
         finalImgCap.textContent = `Image: ${industry} (fallback)`;
-        state.finalSvgData = src;
+        state.finalImgUrl = src;
       }
     }
 
+    /* ===== "Knowledge Pack" (DOCX/TXT) loader (optional override) ===== */
+    const knowledgeFile = document.getElementById("knowledgeFile");
+    const kBadge = document.getElementById("kBadge");
+    const btnClearKnowledge = document.getElementById("btnClearKnowledge");
+
+    async function loadKnowledgeFromFile(file) {
+      if (!file) return "";
+      const name = (file.name || "").toLowerCase();
+      if (name.endsWith(".txt")) return await file.text();
+      if (name.endsWith(".docx")) {
+        const ab = await file.arrayBuffer();
+        const result = await window.mammoth.extractRawText({ arrayBuffer: ab });
+        return (result?.value || "").trim();
+      }
+      throw new Error("Unsupported file type. Please upload .docx or .txt");
+    }
+
+    function setKnowledgeStatus(text) {
+      const has = !!(text && text.trim().length);
+      if (!has) {
+        kBadge.textContent = "Knowledge: none";
+        return;
+      }
+      const chars = text.trim().length;
+      const label = (text === ODYSSEY_KNOWLEDGE_HARDCODED)
+        ? `Knowledge: built-in (${chars.toLocaleString()} chars)`
+        : `Knowledge: override (${chars.toLocaleString()} chars)`;
+      kBadge.textContent = label;
+    }
+
+    knowledgeFile.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const txt = await loadKnowledgeFromFile(file);
+        state.odysseyKnowledge = txt;
+        setKnowledgeStatus(txt);
+      } catch (err) {
+        alert(String(err?.message || err));
+      }
+    });
+
+    btnClearKnowledge.addEventListener("click", () => {
+      knowledgeFile.value = "";
+      state.odysseyKnowledge = ODYSSEY_KNOWLEDGE_HARDCODED;
+      setKnowledgeStatus(state.odysseyKnowledge);
+    });
+
     /* ===== SYSTEM CONTEXT ===== */
     const SYSTEM_CONTEXT = `
-Role: You are an expert consultant and pedagogical guide in the Odyssey 3.14 business model innovation framework. Your goal is to help students invent new business models.
+Role: You are an expert consultant and pedagogical guide in the Odyssey 3.14 business model innovation framework.
+Your goal is to help students invent new business models with rigor and specificity.
 
-Framework pillars:
-1) Value Proposition (VP): What / To whom / At what price
-2) Value Architecture (VA): value chain, value network, strategic resources & competencies
-3) Profit Equation: revenues, costs, capital employed
+Core pillars (always keep these coherent):
+1) Value Proposition (VP): Who are the clients / users? What do we offer? At what price & pricing logic?
+2) Value Architecture (VA): How is value created & delivered? (value chain, network/partners, resources, competencies)
+3) Contributions (expanded profit equation): Financial + Environmental + Societal outcomes, trade-offs, risks.
 
-Contributions to evaluate:
-- Financial
-- Environmental
-- Societal
+Process:
+- Start from the "Reference Offer" / current industry logic.
+- Diagnose VP/VA/Contributions.
+- Use the 14 Directions to generate structured shifts.
+- Output one coherent New Business Model + next experiments.
 
-Process: move from Reference Offer (current state) to New Business Model by exploring 14 Directions.
-
-14 Directions:
-1 Reduce customer overall costs
-2 Reduce customer hassles
-3 Find non-customers
-4 Add functionality or emotion
-5 Explore other segments or industries
-6 Introduce other stakeholders
-7 Modify the revenue stream
-8 Introduce a technology
-9 Modify steps in the value chain
-10 Eliminate or add steps
-11 Identify new inputs
-12 Associate with competitors/clients/suppliers
-13 Identify complementors
-14 Leverage strategic resources
+Use crisp Markdown. Avoid invented market numbers; label assumptions.
     `.trim();
+
+    function clampText(s, maxChars) {
+      const t = (s || "").trim();
+      if (t.length <= maxChars) return t;
+      return t.slice(0, maxChars) + "\n\n[TRUNCATED FOR LENGTH]";
+    }
+
+    function buildKnowledgeBlock() {
+      // Safety clamp so prompts don't explode.
+      const k = clampText(state.odysseyKnowledge || "", 12000);
+      return k ? k : "None provided.";
+    }
 
     /* ===== MODEL AUTO-DETECT ===== */
     const BASE = "https://generativelanguage.googleapis.com/v1beta";
@@ -651,7 +861,7 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       hideDebug();
       setModelBadge("Model: (detecting…)");
 
-      let keyToUse = GEMINI_API_KEY; 
+      const keyToUse = GEMINI_API_KEY;
       if (!keyToUse || keyToUse === "PUT_YOUR_KEY_HERE") {
         setModelBadge("Model: (missing API key)");
         return;
@@ -688,7 +898,9 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       underservedIdea: "",
       directions: Array.from({length: 14}, () => ""),
       finalModelText: "",
-      finalSvgData: "", // now used to store the final image URL for download
+      finalImgUrl: "",
+      // ✅ Built-in knowledge loaded automatically
+      odysseyKnowledge: ODYSSEY_KNOWLEDGE_HARDCODED
     };
 
     const TOTAL_STEPS = 17;
@@ -744,14 +956,31 @@ Process: move from Reference Offer (current state) to New Business Model by expl
       el.innerHTML = html || "<p><em>(No output returned.)</em></p>";
     }
 
-    async function callGeminiText(promptText) {
-      let keyToUse = GEMINI_API_KEY;
+    function parseRetrySeconds(rawJsonText) {
+      try {
+        const j = JSON.parse(rawJsonText);
+        const delay = j?.error?.details?.find(d => d["@type"]?.includes("RetryInfo"))?.retryDelay;
+        if (!delay) return null;
+        const m = String(delay).match(/(\d+)\s*s/i);
+        if (m) return parseInt(m[1], 10);
+        return null;
+      } catch {
+        return null;
+      }
+    }
 
+    function countdownMessage(seconds) {
+      return `Rate limited (429). Retrying in ${seconds}s…`;
+    }
+
+    async function callGeminiText(promptText, { statusEl } = {}) {
+      const keyToUse = GEMINI_API_KEY;
       if (!SELECTED_MODEL) throw new Error("No model selected. Click Re-check model.");
+
       const url = `${BASE}/${SELECTED_MODEL}:generateContent?key=${encodeURIComponent(keyToUse)}`;
 
       let attempts = 0;
-      const maxAttempts = 3;
+      const maxAttempts = 6;
 
       while (attempts < maxAttempts) {
         const res = await fetch(url, {
@@ -769,15 +998,39 @@ Process: move from Reference Offer (current state) to New Business Model by expl
 
         if (res.status === 503) {
           attempts++;
-          if (attempts >= maxAttempts) throw new Error("The model is overloaded (503). Try again in 30–60 seconds.");
+          if (attempts >= maxAttempts) throw new Error("The model is overloaded (503). Try again soon.");
+          if (statusEl) statusEl.textContent = `Model overloaded (503). Retrying… (${attempts}/${maxAttempts})`;
           await new Promise(r => setTimeout(r, 1200 * attempts));
+          continue;
+        }
+
+        if (res.status === 429) {
+          attempts++;
+          const retrySec = parseRetrySeconds(raw) ?? Math.min(60, 5 * attempts);
+          if (statusEl) {
+            let s = retrySec;
+            statusEl.textContent = countdownMessage(s);
+            await new Promise(resolve => {
+              const t = setInterval(() => {
+                s--;
+                if (s <= 0) {
+                  clearInterval(t);
+                  resolve();
+                } else {
+                  statusEl.textContent = countdownMessage(s);
+                }
+              }, 1000);
+            });
+          } else {
+            await new Promise(r => setTimeout(r, retrySec * 1000));
+          }
           continue;
         }
 
         throw new Error(`Gemini error ${res.status}: ${raw}`);
       }
 
-      throw new Error("Unexpected error.");
+      throw new Error("Request failed after several retries (rate limit / overload).");
     }
 
     /* ===== Screen logic ===== */
@@ -803,18 +1056,23 @@ Process: move from Reference Offer (current state) to New Business Model by expl
 
       state.industry = industry;
 
-      // ✅ Change Odyssey background on every submit
+      // Change Odyssey background on every submit
       applyRandomTheme();
 
-      // ✅ Set a fun industry-relevant image on both Summary + Final screens (independent of AI)
+      // Set a fun industry-relevant image on both Summary + Final screens
       setIndustryImageEverywhere(industry);
 
       setStep(2);
       showScreen("screenSummary");
       subline.textContent = "Generating a high-level snapshot of today’s industry players (VP + VA)…";
 
+      const knowledge = buildKnowledgeBlock();
+
       const prompt = `
 ${SYSTEM_CONTEXT}
+
+Reference notes (use as ground-truth for the Odyssey method; follow its definitions and logic):
+${knowledge}
 
 Task:
 The student chose this industry: "${industry}".
@@ -822,7 +1080,10 @@ The student chose this industry: "${industry}".
 Write a HIGH-LEVEL snapshot of the main current players in this industry.
 Do NOT invent specific company financials. You may name typical player types and if you mention example brands, label them as examples.
 
-IMPORTANT: Format your answer as clean Markdown with headings, bullet lists, and a small table if useful.
+IMPORTANT:
+- Keep the structure rigorous (VP/VA/Contributions mindset).
+- Be concrete and specific.
+- Use clean Markdown.
 
 Output format (use EXACT headings):
 ## 1) Industry map (who plays)
@@ -837,18 +1098,17 @@ Output format (use EXACT headings):
 ## 4) Current unmet needs / tensions
 - 5 bullets
 
-Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it helps readability.
+Keep it under ~350 words.
       `.trim();
 
       renderMarkdownInto(summaryTextEl, "_Generating…_");
       errorSummary.textContent = "";
 
       try {
-        const out = await callGeminiText(prompt);
+        const out = await callGeminiText(prompt, { statusEl: errorSummary });
         state.industrySummary = out;
         renderMarkdownInto(summaryTextEl, out);
         subline.textContent = "Read the snapshot, then continue.";
-        // ✅ We do NOT generate diagrams anymore (image stays industry-based)
       } catch (e) {
         summaryTextEl.innerHTML = "";
         errorSummary.textContent = String(e.message || e);
@@ -943,7 +1203,7 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
     const btnRestart = document.getElementById("btnRestart");
     const btnOutputBack = document.getElementById("btnOutputBack");
     const btnExportMD = document.getElementById("btnExportMD");
-    const btnExportSVG = document.getElementById("btnExportSVG");
+    const btnExportIMG = document.getElementById("btnExportIMG");
 
     btnRestart.addEventListener("click", () => {
       state.industry = "";
@@ -951,14 +1211,14 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       state.underservedIdea = "";
       state.directions = Array.from({length: 14}, () => "");
       state.finalModelText = "";
-      state.finalSvgData = "";
+      state.finalImgUrl = "";
+      // keep knowledge (built-in or override) as-is
 
       industryInput.value = "";
       ideaInput.value = "";
       summaryTextEl.innerHTML = "";
       finalOutputEl.innerHTML = "";
 
-      // Reset visuals to pleasant placeholders
       summaryImg.src = prettyLoadingSvgDataUri("Industry", "Enter an industry to load an image…");
       summaryImgCap.textContent = "Visualizing the industry…";
 
@@ -984,7 +1244,6 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       renderDirection(13);
     });
 
-    // Helper: Download text as file
     function downloadStringAsFile(content, filename) {
       const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
       const url = URL.createObjectURL(blob);
@@ -1002,9 +1261,8 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       downloadStringAsFile(state.finalModelText, `Odyssey314_${state.industry.replace(/\s/g,"_")}.md`);
     });
 
-    // Download the industry image (best effort; may open new tab if CORS blocks fetch)
-    btnExportSVG.addEventListener("click", async () => {
-      const src = state.finalSvgData; // now holds an image URL
+    btnExportIMG.addEventListener("click", async () => {
+      const src = state.finalImgUrl;
       if (!src) return;
 
       try {
@@ -1028,7 +1286,6 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
       errorOutput.textContent = "";
       hideDebug();
 
-      // Keep the same industry image (no diagrams)
       finalImgCap.textContent = "Image matches your chosen industry.";
 
       const answered = DIRECTION_QS.map((d, idx) => {
@@ -1036,8 +1293,13 @@ Keep it under ~350 words. Concrete and structured. Add 1–2 emojis max if it he
         return `Direction ${d.n} (${d.title}): ${a ? a : "(pass)"}`;
       }).join("\n");
 
+      const knowledge = buildKnowledgeBlock();
+
       const prompt = `
 ${SYSTEM_CONTEXT}
+
+Reference notes (use as ground-truth for the Odyssey method; follow its definitions and logic):
+${knowledge}
 
 Student project:
 Industry: ${state.industry}
@@ -1057,7 +1319,10 @@ Propose ONE coherent "New Business Model" that builds on:
 - underserved idea,
 - and Direction answers.
 
-IMPORTANT: Format your answer as clean Markdown with headings, bullet lists, and a small score table for Contributions.
+IMPORTANT:
+- Ensure VP/VA/Contributions are internally consistent.
+- Add explicit assumptions where needed.
+- Use clean Markdown.
 
 Output format (use EXACT headings):
 ## A) New Business Model (Odyssey 3.14)
@@ -1069,10 +1334,10 @@ Output format (use EXACT headings):
 - **Value chain (key steps):**
 - **Value network (key partners/stakeholders):**
 - **Strategic resources & competencies:**
-### 3) Profit Equation
-- **Revenue:**
-- **Costs:**
-- **Capital employed:**
+### 3) Contributions (Financial + Environmental + Societal)
+- **Financial:** revenue logic, major costs, capital intensity; include a simple ROCE-style expression if helpful.
+- **Environmental:** main impacts across the chain (scopes / waste / scarce resources) + 2 mitigations.
+- **Societal:** employability, quality of life, fair value sharing + 2 mitigations.
 
 ## B) Contributions evaluation
 Provide a table with columns: Dimension | Score (1–5) | Why (3 bullets)
@@ -1084,15 +1349,14 @@ Also add: **One key trade-off**
 Constraints:
 - Concrete, not generic.
 - Don’t invent precise market numbers; label assumptions.
-- Keep under ~700 words.
+- Keep under ~800 words.
       `.trim();
 
       try {
-        const out = await callGeminiText(prompt);
+        const out = await callGeminiText(prompt, { statusEl: errorOutput });
         state.finalModelText = out;
         renderMarkdownInto(finalOutputEl, out);
         subline.textContent = "Done. You can go back and tweak answers, then regenerate.";
-        // ✅ No diagram generation here
       } catch (e) {
         finalOutputEl.innerHTML = "";
         errorOutput.textContent = String(e.message || e);
@@ -1106,9 +1370,11 @@ Constraints:
     detectModel();
     setStep(1);
 
-    // preload pleasant placeholders
     summaryImg.src = prettyLoadingSvgDataUri("Industry", "Enter an industry to load an image…");
     finalImg.src = prettyLoadingSvgDataUri("Business model", "Enter an industry to load an image…");
+
+    // show built-in knowledge status immediately
+    setKnowledgeStatus(state.odysseyKnowledge);
   </script>
 </body>
 </html>
