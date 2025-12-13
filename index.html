@@ -279,7 +279,7 @@
       font-weight: 800;
     }
 
-    /* ===== Auto visuals (✅ made ~2x smaller) ===== */
+    /* ===== Auto visuals (✅ ~2x smaller) ===== */
     .imgWrap{
       margin-top: 12px;
       border-radius: 18px;
@@ -425,14 +425,10 @@
     /* ============================================================
        ✅ CONFIG (NO API KEY IN BROWSER)
        ============================================================ */
-    const GEMINI_PROXY_URL = "https://314.andrew-albert96.workers.dev"; // <- keep this
-
-    /* ============================================================
-       ✅ Helper: build v1beta base (handles trailing slash)
-       ============================================================ */
+    const GEMINI_PROXY_URL = "https://314.andrew-albert96.workers.dev"; // keep this
     const PROXY_BASE = GEMINI_PROXY_URL.replace(/\/+$/, "") + "/v1beta";
 
-    /* ===== OPTION C: HARDCODED ODYSSEY KNOWLEDGE (from your DOCX) ===== */
+    /* ===== OPTION C: HARDCODED ODYSSEY KNOWLEDGE ===== */
     const ODYSSEY_KNOWLEDGE_HARDCODED = `An In-Depth Guide to the Odyssey 3.14 Business Model Innovatio...is a baseline expectation, the competitive frontier has shifte
 [NOTE: Full document text is embedded below exactly as extracted from your DOCX.]
 
@@ -561,9 +557,7 @@ A complete Odyssey 3.14 output includes:
 • One key trade-off and how you handle it
 `;
 
-    /* ============================================================
-       ✅ Background image reliability fix (preload + fallback)
-       ============================================================ */
+    /* ===== Background image reliability fix (preload + fallback) ===== */
     function preloadImage(url) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -767,7 +761,7 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       return k ? k : "None provided.";
     }
 
-    /* ===== MODEL AUTO-DETECT (VIA WORKER FORWARD PROXY) ===== */
+    /* ===== MODEL AUTO-DETECT (REAL v1beta call via Worker) ===== */
     let SELECTED_MODEL = null;
 
     const modelBadge = document.getElementById("modelBadge");
@@ -811,41 +805,30 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       hideDebug();
       setModelBadge("Model: (detecting…)");
 
-      if (!GEMINI_PROXY_URL) {
-        setModelBadge("Model: (missing proxy URL)");
-        showDebug("Set GEMINI_PROXY_URL to your deployed Cloudflare Worker URL.");
-        SELECTED_MODEL = null;
-        return;
-      }
-
-      const url = `${PROXY_BASE}/models`;
-
       try {
-        const res = await fetch(url, { method: "GET" });
+        const res = await fetch(`${PROXY_BASE}/models`);
         const text = await res.text();
 
         if (!res.ok) {
-          setModelBadge("Model: (not available)");
-          showDebug(text);
-          SELECTED_MODEL = null;
+          // Fallback: still let the app run with a default model name
+          SELECTED_MODEL = "models/gemini-1.5-flash";
+          setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong> · <span style="opacity:.85">fallback</span>`);
+          showDebug(`Model list failed (using fallback model).\n\n${text}`);
           return;
         }
 
-        let data;
-        try { data = JSON.parse(text); } catch { data = { raw: text }; }
-
-        SELECTED_MODEL = pickBestTextModel(data.models || []);
-        if (!SELECTED_MODEL) {
-          setModelBadge("Model: (none found)");
-          showDebug(data);
-          return;
-        }
-
-        setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong> · <span style="opacity:.85">Visuals: ✅ (industry images)</span>`);
+        const data = JSON.parse(text);
+        SELECTED_MODEL = pickBestTextModel(data.models || []) || "models/gemini-1.5-flash";
+        setModelBadge(`Model: <strong>${SELECTED_MODEL}</strong> · <span style="opacity:.85">Visuals: ✅</span>`);
       } catch (e) {
-        setModelBadge("Model: (error)");
-        showDebug(String(e));
+        // This is almost always CORS/misconfigured worker
         SELECTED_MODEL = null;
+        setModelBadge("Model: (error)");
+        showDebug(
+          "Failed to fetch the Worker.\n" +
+          "This is usually CORS (Worker must set Access-Control-Allow-Origin).\n\n" +
+          String(e)
+        );
       }
     }
 
@@ -866,7 +849,7 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       return `Rate limited (429). Retrying in ${seconds}s…`;
     }
 
-    /* ===== GEMINI CALL (VIA WORKER FORWARD PROXY) ===== */
+    /* ===== GEMINI CALL (REAL v1beta call via Worker) ===== */
     async function callGeminiText(promptText, { statusEl } = {}) {
       if (!SELECTED_MODEL) throw new Error("No model selected. Click Re-check model.");
 
