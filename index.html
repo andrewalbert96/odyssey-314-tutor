@@ -14,12 +14,18 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 
+  <!-- PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <!-- Mermaid Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+
   <style>
     :root{
       --ink:#111827;
       --muted:#6b7280;
-      --paper: rgba(255, 255, 255, 0.86);
-      --paper-strong: rgba(255, 255, 255, 0.92);
+      --paper: rgba(255, 255, 255, 0.94); /* Slightly more opaque for texture */
+      --paper-strong: rgba(255, 255, 255, 0.96);
       --border: rgba(17,24,39,0.12);
       --accent:#2563eb;
       --accent2:#1d4ed8;
@@ -50,6 +56,13 @@
       overflow-x:hidden;
     }
 
+    /* 🎥 Feature 4: Ken Burns Effect */
+    @keyframes kenburns {
+      0% { transform: scale(1.02) translate(0, 0); }
+      50% { transform: scale(1.08) translate(-1%, -1%); }
+      100% { transform: scale(1.02) translate(0, 0); }
+    }
+
     body::before{
       content:"";
       position:fixed;
@@ -62,6 +75,7 @@
       pointer-events:none;
       z-index:-1;
       transform: scale(1.02);
+      animation: kenburns 40s ease-in-out infinite alternate; /* The Effect */
     }
 
     .container{
@@ -70,7 +84,7 @@
       padding: 28px 18px 44px;
     }
 
-    header{ margin-bottom: 14px; }
+    header{ margin-bottom: 24px; }
 
     h1{
       font-family: "Cinzel", ui-serif, serif;
@@ -81,7 +95,7 @@
     }
 
     h2{
-      margin:0 0 10px 0;
+      margin:0 0 16px 0;
       color: var(--muted);
       font-weight: 700;
       font-size: 18px;
@@ -95,10 +109,10 @@
 
     .row{
       display:flex;
-      gap:10px;
+      gap:16px;
       flex-wrap:wrap;
       align-items:center;
-      margin-top: 10px;
+      margin-top: 14px;
     }
 
     .badge{
@@ -122,102 +136,147 @@
       box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
     }
 
+    /* ⛵ Feature 1: Sailing Ship Progress */
     .progress{
       flex: 1;
       min-width: 220px;
-      height: 10px;
+      height: 6px; /* Thinner line */
       border-radius: 999px;
-      background: rgba(17,24,39,0.08);
-      border: 1px solid rgba(17,24,39,0.06);
-      overflow:hidden;
+      background: rgba(17,24,39,0.1);
+      border: none;
+      overflow: visible; /* Allow ship to stick out */
+      position: relative;
+      margin: 0 10px;
     }
     .progress > div{
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      transition: width .25s ease;
+      background: var(--accent); /* Sea color */
+      border-radius: 999px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    /* The Ship */
+    .progress > div::after {
+      content: "⛵";
+      position: absolute;
+      right: -10px; /* Center icon on tip */
+      top: -16px;   /* Float above line */
+      font-size: 20px;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+      transition: transform 0.3s ease;
     }
 
+    /* 📜 Feature 3: Parchment Texture */
     .card{
       margin-top: 14px;
-      padding: 16px 18px;
+      padding: 24px 28px; /* More breathing room */
       border-radius: 18px;
-      background: var(--paper-strong);
+      background-color: var(--paper-strong);
+      /* Subtle noise pattern */
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
       border: 1px solid var(--border);
-      box-shadow: 0 16px 40px rgba(17,24,39,0.10);
+      box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.05), 
+        0 10px 15px -3px rgba(0, 0, 0, 0.05),
+        inset 0 0 40px rgba(234, 179, 8, 0.05); /* Very subtle gold tint */
+      
+      /* Base state for transition */
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
+    
+    /* Cinematic Transitions classes */
+    .card.hidden-anim { display: none; }
+    .card.entering { display: block; opacity: 0; transform: translateY(20px); }
+    .card.exiting { opacity: 0; transform: translateY(-20px) scale(0.98); }
 
     .card h3{
       margin: 0 0 10px 0;
       font-family: "Cinzel", ui-serif, serif;
       letter-spacing: 0.01em;
       font-weight: 800;
-      font-size: 18px;
+      font-size: 20px;
     }
 
     label{
       display:block;
-      margin-top: 10px;
-      margin-bottom: 6px;
+      margin-top: 14px;
+      margin-bottom: 8px;
       font-weight: 800;
+      color: #374151;
     }
 
     input[type="text"], textarea{
       width:100%;
       box-sizing:border-box;
-      padding: 12px 12px;
-      border-radius: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
       border: 1px solid var(--border);
-      background: var(--paper);
+      background: rgba(255,255,255,0.7);
       outline:none;
-      transition: box-shadow .15s ease, border-color .15s ease;
+      transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
       font-family: inherit;
       font-size: 16px;
     }
-    textarea{ min-height: 130px; resize: vertical; }
+    textarea{ min-height: 140px; resize: vertical; line-height: 1.5; }
 
     input:focus, textarea:focus{
+      background: #fff;
       border-color: rgba(37,99,235,0.55);
-      box-shadow: 0 0 0 4px rgba(37,99,235,0.14);
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
     }
 
     .actions{
       display:flex;
-      gap:10px;
+      gap:12px;
       flex-wrap:wrap;
-      margin-top: 12px;
+      margin-top: 20px;
       align-items:center;
     }
 
     button{
-      padding: 11px 18px;
+      padding: 12px 24px;
       border-radius: 999px;
-      border: 1px solid rgba(37,99,235,0.25);
+      border: 1px solid rgba(255,255,255,0.2);
       background: linear-gradient(180deg, var(--accent), var(--accent2));
       color:white;
-      font-weight: 900;
+      font-weight: 700;
+      letter-spacing: 0.02em;
       cursor:pointer;
-      box-shadow: 0 10px 30px rgba(17,24,39,0.12);
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
       transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
     }
-    button:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+    button:hover{ transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
     button:active{ transform: translateY(0px); }
     button:disabled{ opacity:0.6; cursor:default; box-shadow:none; }
 
     .secondary{
-      background: rgba(255,255,255,0.55);
+      background: rgba(255,255,255,0.6);
       color: var(--ink);
       border: 1px solid var(--border);
-      box-shadow: none;
-      font-weight: 800;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      font-weight: 700;
     }
+    .secondary:hover { background: rgba(255,255,255,0.9); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
 
     .ghost{
       background: transparent;
       color: var(--ink);
-      border: 1px dashed rgba(17,24,39,0.25);
+      border: 1px dashed rgba(17,24,39,0.3);
       box-shadow: none;
-      font-weight: 800;
+      font-weight: 700;
+    }
+    
+    @keyframes pulse-blue {
+      0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+      70% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    }
+    
+    .btn-pulse {
+      animation: pulse-blue 2s infinite;
     }
 
     .error{
@@ -229,8 +288,9 @@
 
     .hint{
       color: var(--muted);
-      font-size: 13px;
-      margin-top: 6px;
+      font-size: 14px;
+      margin-top: 8px;
+      line-height: 1.4;
     }
 
     .screen{ display:none; }
@@ -238,31 +298,33 @@
 
     /* ===== Vibrant AI Output Styling ===== */
     .ai{
-      background: rgba(255,255,255,0.55);
-      border: 1px solid rgba(17,24,39,0.10);
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(17,24,39,0.08);
       border-radius: 16px;
-      padding: 14px 14px;
+      padding: 18px;
     }
     .ai h1,.ai h2,.ai h3{
       font-family:"Cinzel",serif;
-      margin:14px 0 8px;
+      margin:18px 0 10px;
       letter-spacing: 0.01em;
+      color: #1e3a8a;
     }
-    .ai p{ margin:8px 0; }
-    .ai ul, .ai ol{ margin:8px 0 8px 22px; }
+    .ai p{ margin:10px 0; line-height: 1.6; }
+    .ai ul, .ai ol{ margin:10px 0 10px 24px; line-height: 1.6; }
     .ai li{ margin:6px 0; }
-    .ai strong{ color:#0f172a; }
+    .ai strong{ color:#0f172a; font-weight:700; }
     .ai blockquote{
-      margin:10px 0;
-      padding:10px 12px;
+      margin:12px 0;
+      padding:12px 16px;
       border-left:4px solid rgba(37,99,235,.55);
-      background:rgba(255,255,255,.65);
-      border-radius:12px;
+      background:rgba(255,255,255,.6);
+      border-radius:8px;
+      font-style: italic;
     }
     .ai table{
       width:100%;
       border-collapse: collapse;
-      margin:10px 0;
+      margin:14px 0;
       overflow:hidden;
       border-radius: 14px;
       border: 1px solid rgba(17,24,39,0.12);
@@ -270,7 +332,7 @@
     }
     .ai th, .ai td{
       text-align:left;
-      padding:10px 10px;
+      padding:12px 14px;
       border-bottom: 1px solid rgba(17,24,39,0.08);
       vertical-align: top;
     }
@@ -278,6 +340,26 @@
       background: rgba(37,99,235,0.08);
       font-weight: 800;
     }
+
+    /* ===== ✨ Feature 2: Skeleton Loaders ===== */
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+    
+    .skel-block {
+      animation: shimmer 2s infinite linear;
+      background: linear-gradient(to right, rgba(255,255,255,0) 4%, rgba(255,255,255,0.5) 25%, rgba(255,255,255,0) 36%);
+      background-size: 1000px 100%;
+      background-color: rgba(0,0,0,0.05);
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    
+    .skel-title { height: 28px; width: 60%; margin-bottom: 16px; background-color: rgba(0,0,0,0.08); }
+    .skel-line { height: 16px; width: 100%; }
+    .skel-line.short { width: 70%; }
+    .skel-para { margin-bottom: 20px; }
 
     /* ===== Auto visuals (✅ ~2x smaller) ===== */
     .imgWrap{
@@ -289,6 +371,7 @@
       max-width: 520px;
       margin-left: auto;
       margin-right: auto;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
     }
     .imgWrap img{
       display:block;
@@ -301,8 +384,9 @@
       padding:10px 12px;
       font-size: 13px;
       color: var(--muted);
-      background: rgba(255,255,255,0.65);
+      background: rgba(255,255,255,0.85);
       border-top: 1px solid rgba(17,24,39,0.08);
+      backdrop-filter: blur(4px);
     }
   </style>
 </head>
@@ -315,6 +399,7 @@
 
       <div class="row">
         <span class="badge" id="modelBadge"><span class="dot"></span>Model: (detecting…)</span>
+        <!-- ⛵ Ship Progress Bar -->
         <div class="progress" aria-label="Progress">
           <div id="progressBar"></div>
         </div>
@@ -381,7 +466,17 @@
       <p class="small" id="directionSubtitle">Answer in 2–6 lines. You can skip.</p>
 
       <label id="directionLabel" for="directionAnswer">Question</label>
+      
+      <!-- New Toolbar for AI Assistance -->
+      <div style="display:flex; justify-content:flex-end; margin-bottom:6px;">
+        <button id="btnInspire" type="button" class="secondary btn-pulse" style="font-size:12px; padding:6px 12px; background:rgba(255,255,255,0.7);">✨ Inspire Me</button>
+      </div>
+
       <textarea id="directionAnswer" placeholder="Type your answer (or leave blank and click Skip)…"></textarea>
+      
+      <!-- Container for AI suggestions -->
+      <div id="aiSuggestions" class="ai" style="display:none; margin-top:10px; font-size:14px; background:var(--tintA);"></div>
+      
       <div class="hint" id="directionHint"></div>
 
       <div class="actions">
@@ -404,10 +499,14 @@
 
       <div id="finalOutput" class="ai" style="margin-top:12px;"></div>
 
+      <!-- Mermaid Chart Container -->
+      <div id="mermaidChart" class="ai" style="margin-top:12px; overflow-x:auto; display:none;"></div>
+
       <div class="actions">
+        <button id="btnExportPDF" class="secondary" type="button">Download PDF</button>
         <button id="btnExportMD" class="secondary" type="button">Download Report (.md)</button>
         <button id="btnExportIMG" class="secondary" type="button">Download Image</button>
-        <button id="btnRestart" class="ghost" type="button">Restart</button>
+        <button id="btnRestart" class="ghost" type="button">Restart (Clear Data)</button>
         <button id="btnOutputBack" class="ghost" type="button">Back</button>
       </div>
 
@@ -427,6 +526,107 @@
        ============================================================ */
     const GEMINI_PROXY_URL = "https://314.andrew-albert96.workers.dev"; // keep this
     const PROXY_BASE = GEMINI_PROXY_URL.replace(/\/+$/, "") + "/v1beta";
+
+    // Initialize Mermaid
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+
+    /* ============================================================
+       🔊 AUDIO ENGINE (Synthesized Sound FX)
+       ============================================================ */
+    const AudioEngine = {
+        ctx: null,
+        
+        init: function() {
+            if (!this.ctx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) this.ctx = new AudioContext();
+            }
+            if (this.ctx && this.ctx.state === 'suspended') {
+                this.ctx.resume();
+            }
+        },
+
+        playClick: function() {
+            if (!this.ctx) this.init();
+            if (!this.ctx) return;
+            
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            
+            // Wood block / tactile click sound
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, t);
+            osc.frequency.exponentialRampToValueAtTime(400, t + 0.05);
+            
+            gain.gain.setValueAtTime(0.3, t);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+            
+            osc.start(t);
+            osc.stop(t + 0.05);
+        },
+
+        playQuill: function() {
+            // Very subtle ticking for "writing"
+            if (!this.ctx) return;
+            // Rate limit ticks to avoid machine gun sound
+            if (Math.random() > 0.3) return;
+
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(1200 + Math.random() * 400, t); // varied pitch
+            
+            gain.gain.setValueAtTime(0.05, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+            
+            osc.start(t);
+            osc.stop(t + 0.03);
+        },
+
+        playSuccess: function() {
+            if (!this.ctx) this.init();
+            if (!this.ctx) return;
+
+            const t = this.ctx.currentTime;
+            // Magical chime (major chord arpeggio)
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C, E, G, C
+            
+            notes.forEach((freq, i) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                // Staggered start
+                const start = t + (i * 0.1);
+                gain.gain.setValueAtTime(0, start);
+                gain.gain.linearRampToValueAtTime(0.1, start + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, start + 1.5);
+                
+                osc.start(start);
+                osc.stop(start + 1.5);
+            });
+        }
+    };
+
+    // Initialize audio on first click anywhere
+    document.addEventListener('click', () => {
+        AudioEngine.init();
+        AudioEngine.playClick();
+    }, { once: true });
 
     /* ===== OPTION C: HARDCODED ODYSSEY KNOWLEDGE ===== */
     const ODYSSEY_KNOWLEDGE_HARDCODED = `An In-Depth Guide to the Odyssey 3.14 Business Model Innovatio...is a baseline expectation, the competitive frontier has shifte
@@ -935,9 +1135,34 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
     }
 
     function showScreen(id) {
-      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      const active = document.querySelector(".screen.active");
+      const next = document.getElementById(id);
+      
+      if (!active) {
+          // First load
+          next.classList.add("active");
+          return;
+      }
+      
+      if (active === next) return;
+
+      // Cinematic Exit
+      active.classList.add("exiting");
+      
+      setTimeout(() => {
+          active.classList.remove("active", "exiting");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          
+          // Enter new screen
+          next.classList.add("entering"); // set state to translate down/opacity 0
+          next.classList.add("active"); // make it block
+          
+          // Trigger reflow to ensure the entering state is captured before removing it
+          void next.offsetWidth;
+          
+          // Animate in
+          next.classList.remove("entering");
+      }, 400); // match transition time
     }
 
     const DIRECTION_QS = [
@@ -953,7 +1178,7 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       { n: 10, title: "Eliminate or add steps", q: "What step could you remove as useless—or add to create value?", hint: "Remove friction; add education, trust, verification, or personalization." },
       { n: 11, title: "Identify new inputs", q: "What new inputs could be used (materials, data, knowledge, skills, local sourcing)?", hint: "Think circular economy, open data, community sourcing, partnerships." },
       { n: 12, title: "Associate with competitors/clients/suppliers", q: "Could you partner with competitors, suppliers, or clients (co-opetition, vertical integration) to unlock value?", hint: "Name a plausible partner type and why they’d say yes." },
-      { n: 13, title: "Identify complementors", q: "What complements could you integrate (before/during/after the main use) to improve the experience?", hint: "Example: setup, financing, insurance, training, aftercare, resale." },
+      { n: 13, title: "Identify complementors", q: "What complements could you integrate (before/during/after the main use) to improve the experience?", hint: "Example: setup, financing, insurance, training, resale." },
       { n: 14, title: "Leverage strategic resources", q: "What underused asset/capability could be leveraged differently (brand, data, locations, community, expertise)?", hint: "Name the resource + the new use." },
     ];
 
@@ -966,11 +1191,47 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       document.getElementById("directionAnswer").value = state.directions[i] || "";
       setStep(4 + i);
       subline.textContent = "Answer each Direction (or Skip). After 14, we generate a full Odyssey 3.14 model.";
+      
+      // Clear old AI suggestions when moving to a new step
+      if(typeof clearSuggestions === "function") clearSuggestions();
+    }
+
+    /* ✍️ TYPEWRITER EFFECT RENDERER */
+    async function typewriterRender(el, markdownText) {
+      el.innerHTML = "";
+      const chunks = markdownText.split(/(\n\n+)/); // split by paragraph blocks
+      
+      let fullBuffer = "";
+      
+      for (const chunk of chunks) {
+          fullBuffer += chunk;
+          el.innerHTML = DOMPurify.sanitize(marked.parse(fullBuffer));
+          
+          // 🔊 Play soft quill sounds during typing
+          if (window.AudioEngine) window.AudioEngine.playQuill();
+          
+          // Approximate "typing" speed: fast for code, readable for text
+          const delay = Math.min(chunk.length * 2, 50); 
+          await new Promise(r => setTimeout(r, delay));
+      }
     }
 
     function renderMarkdownInto(el, md) {
+      // Direct render for non-streamed content (like history)
       const html = DOMPurify.sanitize(marked.parse(md || ""));
       el.innerHTML = html || "<p><em>(No output returned.)</em></p>";
+    }
+    
+    /* 🦴 RENDER SKELETON LOADER */
+    function renderSkeleton(el) {
+        let html = '';
+        html += '<div class="skel-block"><div class="skel-title"></div>';
+        html += '<div class="skel-line"></div><div class="skel-line"></div><div class="skel-line short"></div><div class="skel-para"></div>';
+        html += '<div class="skel-line"></div><div class="skel-line"></div><div class="skel-line"></div><div class="skel-para"></div>';
+        html += '<div class="skel-title" style="width:40%"></div>';
+        html += '<div class="skel-line"></div><div class="skel-line"></div>';
+        html += '</div>';
+        el.innerHTML = html;
     }
 
     /* ===== Screen logic ===== */
@@ -987,6 +1248,13 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
     const errorOutput = document.getElementById("errorOutput");
     const finalImg = document.getElementById("finalImg");
     const finalImgCap = document.getElementById("finalImgCap");
+
+    // Helper: add click sound to all buttons
+    document.querySelectorAll("button").forEach(b => {
+        b.addEventListener("click", () => {
+            if(window.AudioEngine) window.AudioEngine.playClick();
+        });
+    });
 
     btnIndustryNext.addEventListener("click", async () => {
       errorIndustry.textContent = "";
@@ -1027,7 +1295,7 @@ Output format (use EXACT headings):
 ## 2) Typical Value Proposition (VP) today
 - **What**
 - **To whom**
-- **At what price** (pricing patterns)
+- **At what price (pricing patterns)
 ## 3) Typical Value Architecture (VA) today
 - **Value chain** (key steps)
 - **Value network** (partners/stakeholders)
@@ -1038,13 +1306,17 @@ Output format (use EXACT headings):
 Keep it under ~350 words.
       `.trim();
 
-      renderMarkdownInto(summaryTextEl, "_Generating…_");
+      // ✨ Show Skeleton
+      renderSkeleton(summaryTextEl);
       errorSummary.textContent = "";
 
       try {
         const out = await callGeminiText(prompt, { statusEl: errorSummary });
         state.industrySummary = out;
-        renderMarkdownInto(summaryTextEl, out);
+        
+        // Use Typewriter effect here
+        await typewriterRender(summaryTextEl, out);
+        
         subline.textContent = "Read the snapshot, then continue.";
       } catch (e) {
         summaryTextEl.innerHTML = "";
@@ -1098,6 +1370,85 @@ Keep it under ~350 words.
       state.directions[directionIndex] = directionAnswer.value.trim();
     }
 
+    /* ============================================================
+       ✨ NEW FEATURE: AI BRAINSTORMING ASSISTANT
+       ============================================================ */
+    const btnInspire = document.getElementById("btnInspire");
+    const aiSuggestions = document.getElementById("aiSuggestions");
+
+    btnInspire.addEventListener("click", async () => {
+      // 1. UI State: Loading
+      btnInspire.disabled = true;
+      btnInspire.textContent = "Thinking...";
+      aiSuggestions.style.display = "block";
+      renderSkeleton(aiSuggestions);
+
+      // 2. Context
+      const currentDir = DIRECTION_QS[directionIndex];
+      const industry = state.industry;
+      
+      // 3. Prompt
+      const prompt = `
+Context: The user is innovating in the "${industry}" industry using the Odyssey 3.14 framework.
+Current Task: Answer Direction #${currentDir.n}: "${currentDir.title}".
+Definition: ${currentDir.q}
+
+Goal: Provide 3 distinct, creative, and concrete examples of how players in this industry (or analogies from other industries) could apply this direction.
+Keep them brief (1 sentence each). Start each with "• ".
+      `.trim();
+
+      try {
+        // 4. Call AI
+        const ideas = await callGeminiText(prompt);
+        
+        // 5. Render clickable ideas
+        // We format them so clicking an idea appends it to the textarea
+        const lines = ideas.split("\n").filter(line => line.trim().length > 0);
+        
+        let html = "<strong>Ideas (click to add):</strong><br/>";
+        lines.forEach(line => {
+           // clean the line
+           const cleanLine = line.replace(/^[•\-\*]\s*/, "");
+           html += `<div style="cursor:pointer; padding:6px; margin:4px 0; border:1px dashed var(--accent); border-radius:6px;" 
+                        onclick="appendIdea('${cleanLine.replace(/'/g, "\\'")}')">
+                      ➕ ${cleanLine}
+                    </div>`;
+        });
+        
+        aiSuggestions.innerHTML = html;
+
+      } catch (e) {
+        aiSuggestions.textContent = "Error getting ideas. Try again.";
+        console.error(e);
+      } finally {
+        btnInspire.disabled = false;
+        btnInspire.textContent = "✨ Inspire Me";
+      }
+    });
+
+    // Helper to append text to the textarea
+    window.appendIdea = function(text) {
+      const box = document.getElementById("directionAnswer");
+      const sep = box.value.length > 0 ? "\n" : "";
+      box.value += sep + text;
+      // Visual feedback
+      box.style.borderColor = "var(--accent)";
+      setTimeout(() => box.style.borderColor = "", 300);
+      
+      // Trigger save on manual add
+      saveProgress();
+    };
+
+    // Clear suggestions when moving to next question
+    function clearSuggestions() {
+      aiSuggestions.style.display = "none";
+      aiSuggestions.innerHTML = "";
+    }
+
+    /* ============================================================
+       END NEW FEATURE
+       ============================================================ */
+
     btnDirNext.addEventListener("click", () => {
       errorDir.textContent = "";
       saveCurrentDirectionAnswer();
@@ -1141,8 +1492,57 @@ Keep it under ~350 words.
     const btnOutputBack = document.getElementById("btnOutputBack");
     const btnExportMD = document.getElementById("btnExportMD");
     const btnExportIMG = document.getElementById("btnExportIMG");
+    const btnExportPDF = document.getElementById("btnExportPDF");
+
+    /* ============================================================
+       💾 AUTO-SAVE FEATURE
+       ============================================================ */
+    const STORAGE_KEY = "odyssey_wizard_v1";
+    
+    function saveProgress() {
+      // Also update directions state if we are on that screen
+      if (document.getElementById("screenDirections").classList.contains("active")) {
+          state.directions[directionIndex] = directionAnswer.value;
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+    
+    function loadProgress() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if(!saved) return false;
+      try {
+        const parsed = JSON.parse(saved);
+        // Merge saved state into current state
+        Object.assign(state, parsed);
+        
+        // Restore inputs
+        industryInput.value = state.industry || "";
+        ideaInput.value = state.underservedIdea || "";
+        
+        // Restore images if they exist
+        if(state.finalImgUrl) {
+            summaryImg.src = state.finalImgUrl;
+            finalImg.src = state.finalImgUrl;
+        }
+        
+        if (state.industry) {
+            applyRandomTheme();
+        }
+        return true;
+      } catch(e) {
+        console.error("Save load failed", e);
+        return false;
+      }
+    }
+    
+    // Add listeners for auto-save
+    industryInput.addEventListener("input", saveProgress);
+    ideaInput.addEventListener("input", saveProgress);
+    directionAnswer.addEventListener("input", saveProgress);
 
     btnRestart.addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      
       state.industry = "";
       state.industrySummary = "";
       state.underservedIdea = "";
@@ -1154,6 +1554,8 @@ Keep it under ~350 words.
       ideaInput.value = "";
       summaryTextEl.innerHTML = "";
       finalOutputEl.innerHTML = "";
+      document.getElementById("mermaidChart").innerHTML = "";
+      document.getElementById("mermaidChart").style.display = "none";
 
       summaryImg.src = prettyLoadingSvgDataUri("Industry", "Enter an industry to load an image…");
       summaryImgCap.textContent = "Visualizing the industry…";
@@ -1173,6 +1575,29 @@ Keep it under ~350 words.
       setStep(1);
       subline.textContent = "Start by choosing an industry. You can skip any Direction question.";
       showScreen("screenIndustry");
+    });
+    
+    /* ============================================================
+       📄 PDF EXPORT
+       ============================================================ */
+    btnExportPDF.addEventListener("click", () => {
+        const element = document.getElementById("screenOutput");
+        const opt = {
+          margin:       0.5,
+          filename:     `Odyssey_${state.industry.replace(/\s/g,"_")}.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2 },
+          jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        
+        // Hide actions for PDF
+        const actions = element.querySelector(".actions");
+        const prevDisplay = actions.style.display;
+        actions.style.display = "none";
+        
+        html2pdf().set(opt).from(element).save().then(() => {
+            actions.style.display = prevDisplay;
+        });
     });
 
     btnOutputBack.addEventListener("click", () => {
@@ -1218,7 +1643,9 @@ Keep it under ~350 words.
     });
 
     async function generateFinalModel() {
-      renderMarkdownInto(finalOutputEl, "_Generating…_");
+      // ✨ Show Skeleton
+      renderSkeleton(finalOutputEl);
+      document.getElementById("mermaidChart").style.display = "none";
       errorOutput.textContent = "";
       hideDebug();
 
@@ -1259,6 +1686,7 @@ IMPORTANT:
 - Ensure VP/VA/Contributions are internally consistent.
 - Add explicit assumptions where needed.
 - Use clean Markdown.
+- At the very end of your response, strictly following the text, provide a Mermaid.js flowchart syntax diagram representing the new business model's value architecture. Enclose it in a markdown code block labeled 'mermaid'. The graph should be simple (graph TD).
 
 Output format (use EXACT headings):
 ## A) New Business Model (Odyssey 3.14)
@@ -1282,6 +1710,9 @@ Also add: **One key trade-off**
 ## C) 5 Next experiments
 - Five low-cost tests for next week.
 
+## D) Visual Diagram
+(Mermaid code block here)
+
 Constraints:
 - Concrete, not generic.
 - Don’t invent precise market numbers; label assumptions.
@@ -1290,8 +1721,35 @@ Constraints:
 
       try {
         const out = await callGeminiText(prompt, { statusEl: errorOutput });
-        state.finalModelText = out;
-        renderMarkdownInto(finalOutputEl, out);
+        
+        // Extract Mermaid Block
+        const mermaidRegex = /```mermaid([\s\S]*?)```/;
+        const match = out.match(mermaidRegex);
+        
+        if (match) {
+            const chartCode = match[1].trim();
+            // Remove the mermaid block from the text so it doesn't show as raw markdown
+            const cleanText = out.replace(mermaidRegex, "");
+            state.finalModelText = cleanText;
+            
+            // 🔊 Play Success Chime
+            if(window.AudioEngine) window.AudioEngine.playSuccess();
+
+            // Render text with Typewriter effect
+            await typewriterRender(finalOutputEl, cleanText);
+            
+            // Render chart
+            const chartDiv = document.getElementById("mermaidChart");
+            chartDiv.style.display = "block";
+            chartDiv.innerHTML = `<div class="mermaid">${chartCode}</div>`;
+            mermaid.init(undefined, chartDiv.querySelectorAll(".mermaid"));
+        } else {
+             state.finalModelText = out;
+             // 🔊 Play Success Chime
+             if(window.AudioEngine) window.AudioEngine.playSuccess();
+             await typewriterRender(finalOutputEl, out);
+        }
+        
         subline.textContent = "Done. You can go back and tweak answers, then regenerate.";
       } catch (e) {
         finalOutputEl.innerHTML = "";
@@ -1304,6 +1762,9 @@ Constraints:
     applyRandomTheme();
     refreshModelsBtn.addEventListener("click", detectModel);
     detectModel();
+    
+    // Load saved data
+    loadProgress();
     setStep(1);
 
     summaryImg.src = prettyLoadingSvgDataUri("Industry", "Enter an industry to load an image…");
