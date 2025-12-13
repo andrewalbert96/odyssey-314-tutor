@@ -504,8 +504,7 @@
 
       <div class="actions">
         <button id="btnExportPDF" class="secondary" type="button">Download PDF</button>
-        <button id="btnExportMD" class="secondary" type="button">Download Report (.md)</button>
-        <button id="btnExportIMG" class="secondary" type="button">Download Image</button>
+        <!-- Removed MD and Image buttons -->
         <button id="btnRestart" class="ghost" type="button">Restart (Clear Data)</button>
         <button id="btnOutputBack" class="ghost" type="button">Back</button>
       </div>
@@ -1490,8 +1489,8 @@ Keep them brief (1 sentence each). Start each with "• ".
 
     const btnRestart = document.getElementById("btnRestart");
     const btnOutputBack = document.getElementById("btnOutputBack");
-    const btnExportMD = document.getElementById("btnExportMD");
-    const btnExportIMG = document.getElementById("btnExportIMG");
+    // const btnExportMD = document.getElementById("btnExportMD"); // Removed
+    // const btnExportIMG = document.getElementById("btnExportIMG"); // Removed
     const btnExportPDF = document.getElementById("btnExportPDF");
 
     /* ============================================================
@@ -1578,25 +1577,95 @@ Keep them brief (1 sentence each). Start each with "• ".
     });
     
     /* ============================================================
-       📄 PDF EXPORT
+       📄 PDF EXPORT (Improved for Clean Layout)
        ============================================================ */
     btnExportPDF.addEventListener("click", () => {
-        const element = document.getElementById("screenOutput");
+        // Create a dedicated export container off-screen
+        const exportContainer = document.createElement('div');
+        exportContainer.style.width = '800px'; // Fixed width for A4 consistency
+        exportContainer.style.padding = '40px';
+        exportContainer.style.background = '#ffffff';
+        exportContainer.style.color = '#000000';
+        exportContainer.style.fontFamily = '"Crimson Pro", serif';
+        exportContainer.style.position = 'absolute';
+        exportContainer.style.top = '-9999px';
+        exportContainer.style.left = '-9999px';
+        
+        // Add Header
+        const title = document.createElement('h1');
+        title.textContent = "Odyssey 3.14 Innovation Model";
+        title.style.fontFamily = '"Cinzel", serif';
+        title.style.textAlign = 'center';
+        title.style.marginBottom = '10px';
+        exportContainer.appendChild(title);
+
+        const sub = document.createElement('h2');
+        sub.textContent = `Industry: ${state.industry}`;
+        sub.style.textAlign = 'center';
+        sub.style.fontSize = '18px';
+        sub.style.color = '#666';
+        sub.style.marginBottom = '30px';
+        sub.style.borderBottom = '1px solid #eee';
+        sub.style.paddingBottom = '20px';
+        exportContainer.appendChild(sub);
+
+        // Add Image
+        if (finalImg.src) {
+            const imgClone = finalImg.cloneNode(true);
+            imgClone.style.maxWidth = '100%';
+            imgClone.style.height = 'auto';
+            imgClone.style.borderRadius = '8px';
+            imgClone.style.marginBottom = '20px';
+            imgClone.style.display = 'block';
+            imgClone.style.marginLeft = 'auto';
+            imgClone.style.marginRight = 'auto';
+            exportContainer.appendChild(imgClone);
+        }
+
+        // Add Text Content
+        const contentDiv = document.createElement('div');
+        contentDiv.innerHTML = finalOutputEl.innerHTML;
+        
+        // Style overrides for PDF text
+        const contentStyles = `
+            <style>
+                h1, h2, h3 { color: #111827; margin-top: 20px; page-break-after: avoid; font-family: "Cinzel", serif; }
+                p, li { line-height: 1.6; font-size: 14px; margin-bottom: 10px; color: #374151; }
+                strong { color: #000; }
+                blockquote { border-left: 4px solid #2563eb; padding-left: 15px; color: #555; font-style: italic; }
+                .mermaid { margin-top: 20px; margin-bottom: 20px; }
+            </style>
+        `;
+        contentDiv.innerHTML = contentStyles + contentDiv.innerHTML;
+        exportContainer.appendChild(contentDiv);
+
+        // Add Mermaid Chart if exists
+        const chartSource = document.getElementById("mermaidChart");
+        if (chartSource && chartSource.innerHTML.trim()) {
+             const chartClone = chartSource.cloneNode(true);
+             chartClone.style.display = 'block';
+             // SVG scaling for PDF
+             const svg = chartClone.querySelector('svg');
+             if(svg) {
+                 svg.style.maxWidth = '100%';
+                 svg.style.height = 'auto';
+             }
+             exportContainer.appendChild(chartClone);
+        }
+
+        document.body.appendChild(exportContainer);
+
         const opt = {
           margin:       0.5,
-          filename:     `Odyssey_${state.industry.replace(/\s/g,"_")}.pdf`,
+          filename:     `Odyssey_${state.industry.replace(/[^a-z0-9]/gi, '_')}.pdf`,
           image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2 },
-          jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+          html2canvas:  { scale: 2, useCORS: true },
+          jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+          pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
         };
-        
-        // Hide actions for PDF
-        const actions = element.querySelector(".actions");
-        const prevDisplay = actions.style.display;
-        actions.style.display = "none";
-        
-        html2pdf().set(opt).from(element).save().then(() => {
-            actions.style.display = prevDisplay;
+
+        html2pdf().set(opt).from(exportContainer).save().then(() => {
+            document.body.removeChild(exportContainer);
         });
     });
 
@@ -1605,42 +1674,7 @@ Keep them brief (1 sentence each). Start each with "• ".
       renderDirection(13);
     });
 
-    function downloadStringAsFile(content, filename) {
-      const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    btnExportMD.addEventListener("click", () => {
-      if (!state.finalModelText) return;
-      downloadStringAsFile(state.finalModelText, `Odyssey314_${state.industry.replace(/\s/g,"_")}.md`);
-    });
-
-    btnExportIMG.addEventListener("click", async () => {
-      const src = state.finalImgUrl;
-      if (!src) return;
-
-      try {
-        const r = await fetch(src, { mode: "cors" });
-        const blob = await r.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `Odyssey314_Image_${state.industry.replace(/\s/g,"_")}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } catch {
-        window.open(src, "_blank");
-      }
-    });
+    // Removed btnExportMD and btnExportIMG logic...
 
     async function generateFinalModel() {
       // ✨ Show Skeleton
