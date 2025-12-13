@@ -707,7 +707,7 @@ Examples: “per result”, “per hour saved”, dynamic pricing.
 
 Direction 8 — Introduce a technology
 Goal: use tech to enable a new model (not just optimize).
-Look at: automation, AI, IoT, AR/VR, platforms, data-driven personalization.
+Look at: automation, AI, IoT, automation, apps, blockchain, AR/VR, platforms, data-driven personalization.
 Examples: predictive maintenance, AI guidance, sensor-based billing.
 
 Direction 9 — Modify steps in the value chain
@@ -1686,7 +1686,7 @@ IMPORTANT:
 - Ensure VP/VA/Contributions are internally consistent.
 - Add explicit assumptions where needed.
 - Use clean Markdown.
-- At the very end of your response, strictly following the text, provide a Mermaid.js flowchart syntax diagram representing the new business model's value architecture. Enclose it in a markdown code block labeled 'mermaid'. The graph should be simple (graph TD).
+- At the very end of your response, strictly following the text, provide a Mermaid.js flowchart syntax diagram representing the new business model's value architecture. Enclose it in a markdown code block labeled 'mermaid'. The graph should be simple (graph TD). Do not use special characters or parentheses in node IDs. Use quotes for node labels if they contain punctuation.
 
 Output format (use EXACT headings):
 ## A) New Business Model (Odyssey 3.14)
@@ -1738,11 +1738,18 @@ Constraints:
             // Render text with Typewriter effect
             await typewriterRender(finalOutputEl, cleanText);
             
-            // Render chart
+            // Render chart safely
             const chartDiv = document.getElementById("mermaidChart");
-            chartDiv.style.display = "block";
-            chartDiv.innerHTML = `<div class="mermaid">${chartCode}</div>`;
-            mermaid.init(undefined, chartDiv.querySelectorAll(".mermaid"));
+            try {
+                // Validate syntax first to avoid the "Bomb" icon
+                await mermaid.parse(chartCode);
+                chartDiv.style.display = "block";
+                chartDiv.innerHTML = `<div class="mermaid">${chartCode}</div>`;
+                await mermaid.run({ nodes: chartDiv.querySelectorAll(".mermaid") });
+            } catch (err) {
+                console.warn("Mermaid rendering failed:", err);
+                chartDiv.style.display = "none"; 
+            }
         } else {
              state.finalModelText = out;
              // 🔊 Play Success Chime
