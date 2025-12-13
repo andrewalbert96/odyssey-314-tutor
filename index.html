@@ -16,9 +16,6 @@
 
   <!-- PDF Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  
-  <!-- Mermaid Charts -->
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
 
   <style>
     :root{
@@ -499,9 +496,6 @@
 
       <div id="finalOutput" class="ai" style="margin-top:12px;"></div>
 
-      <!-- Mermaid Chart Container -->
-      <div id="mermaidChart" class="ai" style="margin-top:12px; overflow-x:auto; display:none;"></div>
-
       <div class="actions">
         <button id="btnExportPDF" class="secondary" type="button">Download PDF</button>
         <!-- Removed MD and Image buttons -->
@@ -525,9 +519,6 @@
        ============================================================ */
     const GEMINI_PROXY_URL = "https://314.andrew-albert96.workers.dev"; // keep this
     const PROXY_BASE = GEMINI_PROXY_URL.replace(/\/+$/, "") + "/v1beta";
-
-    // Initialize Mermaid
-    mermaid.initialize({ startOnLoad: false, theme: 'default' });
 
     /* ============================================================
        🔊 AUDIO ENGINE (Synthesized Sound FX)
@@ -1553,8 +1544,8 @@ Keep them brief (1 sentence each). Start each with "• ".
       ideaInput.value = "";
       summaryTextEl.innerHTML = "";
       finalOutputEl.innerHTML = "";
-      document.getElementById("mermaidChart").innerHTML = "";
-      document.getElementById("mermaidChart").style.display = "none";
+      // document.getElementById("mermaidChart").innerHTML = ""; // Removed
+      // document.getElementById("mermaidChart").style.display = "none"; // Removed
 
       summaryImg.src = prettyLoadingSvgDataUri("Industry", "Enter an industry to load an image…");
       summaryImgCap.textContent = "Visualizing the industry…";
@@ -1633,25 +1624,10 @@ Keep them brief (1 sentence each). Start each with "• ".
                 p, li { line-height: 1.6; font-size: 14px; margin-bottom: 10px; color: #374151; }
                 strong { color: #000; }
                 blockquote { border-left: 4px solid #2563eb; padding-left: 15px; color: #555; font-style: italic; }
-                .mermaid { margin-top: 20px; margin-bottom: 20px; }
             </style>
         `;
         contentDiv.innerHTML = contentStyles + contentDiv.innerHTML;
         exportContainer.appendChild(contentDiv);
-
-        // Add Mermaid Chart if exists
-        const chartSource = document.getElementById("mermaidChart");
-        if (chartSource && chartSource.innerHTML.trim()) {
-             const chartClone = chartSource.cloneNode(true);
-             chartClone.style.display = 'block';
-             // SVG scaling for PDF
-             const svg = chartClone.querySelector('svg');
-             if(svg) {
-                 svg.style.maxWidth = '100%';
-                 svg.style.height = 'auto';
-             }
-             exportContainer.appendChild(chartClone);
-        }
 
         document.body.appendChild(exportContainer);
 
@@ -1679,7 +1655,7 @@ Keep them brief (1 sentence each). Start each with "• ".
     async function generateFinalModel() {
       // ✨ Show Skeleton
       renderSkeleton(finalOutputEl);
-      document.getElementById("mermaidChart").style.display = "none";
+      // document.getElementById("mermaidChart").style.display = "none"; // Removed
       errorOutput.textContent = "";
       hideDebug();
 
@@ -1720,7 +1696,6 @@ IMPORTANT:
 - Ensure VP/VA/Contributions are internally consistent.
 - Add explicit assumptions where needed.
 - Use clean Markdown.
-- At the very end of your response, strictly following the text, provide a Mermaid.js flowchart syntax diagram representing the new business model's value architecture. Enclose it in a markdown code block labeled 'mermaid'. The graph should be simple (graph TD). Do not use special characters or parentheses in node IDs. Use quotes for node labels if they contain punctuation.
 
 Output format (use EXACT headings):
 ## A) New Business Model (Odyssey 3.14)
@@ -1744,9 +1719,6 @@ Also add: **One key trade-off**
 ## C) 5 Next experiments
 - Five low-cost tests for next week.
 
-## D) Visual Diagram
-(Mermaid code block here)
-
 Constraints:
 - Concrete, not generic.
 - Don’t invent precise market numbers; label assumptions.
@@ -1756,42 +1728,14 @@ Constraints:
       try {
         const out = await callGeminiText(prompt, { statusEl: errorOutput });
         
-        // Extract Mermaid Block
-        const mermaidRegex = /```mermaid([\s\S]*?)```/;
-        const match = out.match(mermaidRegex);
+        state.finalModelText = out;
         
-        if (match) {
-            const chartCode = match[1].trim();
-            // Remove the mermaid block from the text so it doesn't show as raw markdown
-            const cleanText = out.replace(mermaidRegex, "");
-            state.finalModelText = cleanText;
-            
-            // 🔊 Play Success Chime
-            if(window.AudioEngine) window.AudioEngine.playSuccess();
+        // 🔊 Play Success Chime
+        if(window.AudioEngine) window.AudioEngine.playSuccess();
 
-            // Render text with Typewriter effect
-            await typewriterRender(finalOutputEl, cleanText);
-            
-            // Render chart safely
-            const chartDiv = document.getElementById("mermaidChart");
-            try {
-                // Validate syntax first to avoid the "Bomb" icon
-                await mermaid.parse(chartCode);
-                chartDiv.style.display = "block";
-                chartDiv.innerHTML = `<div class="mermaid">${chartCode}</div>`;
-                await mermaid.run({ nodes: chartDiv.querySelectorAll(".mermaid") });
-            } catch (err) {
-                console.warn("Mermaid rendering failed:", err);
-                chartDiv.style.display = "none"; 
-            }
-        } else {
-             state.finalModelText = out;
-             // 🔊 Play Success Chime
-             if(window.AudioEngine) window.AudioEngine.playSuccess();
-             await typewriterRender(finalOutputEl, out);
-        }
+        // Render text with Typewriter effect
+        await typewriterRender(finalOutputEl, out);
         
-        subline.textContent = "Done. You can go back and tweak answers, then regenerate.";
       } catch (e) {
         finalOutputEl.innerHTML = "";
         errorOutput.textContent = String(e.message || e);
