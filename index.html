@@ -286,7 +286,7 @@
       overflow:hidden;
       border: 1px solid rgba(17,24,39,0.12);
       background: rgba(255,255,255,0.55);
-      max-width: 520px;     /* was effectively full width */
+      max-width: 520px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -294,8 +294,8 @@
       display:block;
       width:100%;
       height:auto;
-      max-height: 320px;    /* prevents “entire screen” tall images */
-      object-fit: cover;    /* keeps it nice-looking */
+      max-height: 320px;
+      object-fit: cover;
     }
     .imgCap{
       padding:10px 12px;
@@ -424,9 +424,13 @@
   <script>
     /* ============================================================
        ✅ CONFIG (NO API KEY IN BROWSER)
-       Replace this with your deployed Cloudflare Worker URL:
        ============================================================ */
- const GEMINI_PROXY_URL = "https://314.andrew-albert96.workers.dev";
+    const GEMINI_PROXY_URL = "https://314.andrew-albert96.workers.dev"; // <- keep this
+
+    /* ============================================================
+       ✅ Helper: build v1beta base (handles trailing slash)
+       ============================================================ */
+    const PROXY_BASE = GEMINI_PROXY_URL.replace(/\/+$/, "") + "/v1beta";
 
     /* ===== OPTION C: HARDCODED ODYSSEY KNOWLEDGE (from your DOCX) ===== */
     const ODYSSEY_KNOWLEDGE_HARDCODED = `An In-Depth Guide to the Odyssey 3.14 Business Model Innovatio...is a baseline expectation, the competitive frontier has shifte
@@ -584,7 +588,6 @@ A complete Odyssey 3.14 output includes:
       );
     }
 
-    /* ===== Background randomizer (MORE Odyssey art + better look) ===== */
     function applyRandomTheme() {
       const root = document.documentElement;
 
@@ -623,7 +626,6 @@ A complete Odyssey 3.14 output includes:
       root.style.setProperty("--bg-blur", (0.2 + Math.random() * 0.6).toFixed(1) + "px");
     }
 
-    /* ===== Pretty placeholder while loading an industry image ===== */
     function prettyLoadingSvgDataUri(title, subtitle) {
       const safe = (s) => (s || "").replace(/[<>&"]/g, "");
       const svg = `
@@ -656,7 +658,6 @@ A complete Odyssey 3.14 output includes:
       return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg.trim());
     }
 
-    /* ===== Industry image fetcher (Wikipedia -> fallback) ===== */
     async function fetchWikipediaThumb(query) {
       const q = encodeURIComponent(query);
       const url =
@@ -766,7 +767,7 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       return k ? k : "None provided.";
     }
 
-    /* ===== MODEL AUTO-DETECT (VIA PROXY) ===== */
+    /* ===== MODEL AUTO-DETECT (VIA WORKER FORWARD PROXY) ===== */
     let SELECTED_MODEL = null;
 
     const modelBadge = document.getElementById("modelBadge");
@@ -810,21 +811,19 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       hideDebug();
       setModelBadge("Model: (detecting…)");
 
-      if (!GEMINI_PROXY_URL || GEMINI_PROXY_URL.includes("YOUR-WORKER-NAME")) {
+      if (!GEMINI_PROXY_URL) {
         setModelBadge("Model: (missing proxy URL)");
         showDebug("Set GEMINI_PROXY_URL to your deployed Cloudflare Worker URL.");
         SELECTED_MODEL = null;
         return;
       }
 
-      try {
-        const res = await fetch(GEMINI_PROXY_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode: "listModels" })
-        });
+      const url = `${PROXY_BASE}/models`;
 
+      try {
+        const res = await fetch(url, { method: "GET" });
         const text = await res.text();
+
         if (!res.ok) {
           setModelBadge("Model: (not available)");
           showDebug(text);
@@ -850,10 +849,9 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       }
     }
 
-    function parseRetrySecondsFromAny(rawText) {
-      // supports either Gemini-style JSON or worker passthrough
+    function parseRetrySeconds(rawJsonText) {
       try {
-        const j = JSON.parse(rawText);
+        const j = JSON.parse(rawJsonText);
         const delay = j?.error?.details?.find(d => d["@type"]?.includes("RetryInfo"))?.retryDelay;
         if (!delay) return null;
         const m = String(delay).match(/(\d+)\s*s/i);
@@ -868,25 +866,20 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
       return `Rate limited (429). Retrying in ${seconds}s…`;
     }
 
-    /* ===== GEMINI CALL (VIA PROXY) ===== */
+    /* ===== GEMINI CALL (VIA WORKER FORWARD PROXY) ===== */
     async function callGeminiText(promptText, { statusEl } = {}) {
       if (!SELECTED_MODEL) throw new Error("No model selected. Click Re-check model.");
-      if (!GEMINI_PROXY_URL || GEMINI_PROXY_URL.includes("YOUR-WORKER-NAME")) {
-        throw new Error("Missing proxy URL. Set GEMINI_PROXY_URL to your Cloudflare Worker URL.");
-      }
+
+      const url = `${PROXY_BASE}/${SELECTED_MODEL}:generateContent`;
 
       let attempts = 0;
       const maxAttempts = 6;
 
       while (attempts < maxAttempts) {
-        const res = await fetch(GEMINI_PROXY_URL, {
+        const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            mode: "generate",
-            model: SELECTED_MODEL,
-            prompt: promptText
-          })
+          body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
         });
 
         const raw = await res.text();
@@ -898,7 +891,7 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
 
         if (res.status === 503) {
           attempts++;
-          if (attempts >= maxAttempts) throw new Error(`Model overloaded (503). ${raw}`);
+          if (attempts >= maxAttempts) throw new Error("The model is overloaded (503). Try again soon.");
           if (statusEl) statusEl.textContent = `Model overloaded (503). Retrying… (${attempts}/${maxAttempts})`;
           await new Promise(r => setTimeout(r, 1200 * attempts));
           continue;
@@ -906,7 +899,7 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
 
         if (res.status === 429) {
           attempts++;
-          const retrySec = parseRetrySecondsFromAny(raw) ?? Math.min(60, 5 * attempts);
+          const retrySec = parseRetrySeconds(raw) ?? Math.min(60, 5 * attempts);
           if (statusEl) {
             let s = retrySec;
             statusEl.textContent = countdownMessage(s);
@@ -927,9 +920,7 @@ Use crisp Markdown. Avoid invented market numbers; label assumptions.
           continue;
         }
 
-        // IMPORTANT: this is where the leaked-key 403 used to surface;
-        // now it would only happen server-side in the worker (meaning your key is safe).
-        throw new Error(`Gemini proxy error ${res.status}: ${raw}`);
+        throw new Error(`Gemini error ${res.status}: ${raw}`);
       }
 
       throw new Error("Request failed after several retries (rate limit / overload).");
@@ -1337,4 +1328,3 @@ Constraints:
   </script>
 </body>
 </html>
-
